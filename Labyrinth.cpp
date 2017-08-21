@@ -667,6 +667,7 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
            m_qlist_Aliens.erase(it_first_alien);
            it_first_alien = m_qlist_Aliens.begin();
            it_end_alien = m_qlist_Aliens.end();
+           continue;
         }
         it_first_alien++;
     }
