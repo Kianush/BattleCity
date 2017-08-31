@@ -1,7 +1,7 @@
 #ifndef LABYRINTHCELL_H
 #define LABYRINTHCELL_H
 //================================================================================================================
-class StaticGameThings;
+class GameThings;
 class DynamicGameThings;
 //================================================================================================================
 class LabyrinthCell
@@ -21,11 +21,12 @@ public:
     LabyrinthCell * GetRight();
     LabyrinthCell * GetUpper();
     LabyrinthCell * GetLower();
-    void SetStaticCellObject(StaticGameThings * pStaticGameThing);
-    StaticGameThings * GetStaticCellObject();
+
+    GameThings * GetStaticCellObject();
+    DynamicGameThings * GetDynamicGameThings();
+    void SetStaticCellObject(GameThings * pStaticGameThing);
     void SetDynamicCellObject(DynamicGameThings * pDynamicGameThings);
     void RemoveDynamicGameThings(DynamicGameThings * pDynamicGameThings);
-    DynamicGameThings * GetDynamicGameThings();
 private:
     bool IsFreeNeighbour(LabyrinthCell * pLabyrinthCell);
     void RemoveDynamicThingsFromCell(LabyrinthCell * pLabyrinthCell, DynamicGameThings * pDynamicGameThings);
@@ -33,7 +34,7 @@ private:
     LabyrinthCell * m_pRightCell;
     LabyrinthCell * m_pUpperCell;
     LabyrinthCell * m_pLowerCell;
-    StaticGameThings * m_pStaticGameThing;
+    GameThings * m_pStaticGameThing;
     DynamicGameThings * m_pDynamicGameThings;
 };
 //================================================================================================================

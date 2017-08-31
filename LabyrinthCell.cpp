@@ -1,5 +1,5 @@
 #include "LabyrinthCell.h"
-#include "StaticGameThings.h"
+#include "GameThings.h"
 //================================================================================================================
 #include <QDebug>
 //================================================================================================================
@@ -79,12 +79,12 @@ LabyrinthCell * LabyrinthCell::GetLower()
     return m_pLowerCell;
 }
 //================================================================================================================
-void LabyrinthCell::SetStaticCellObject(StaticGameThings * pStaticGameThing)
+void LabyrinthCell::SetStaticCellObject(GameThings *pStaticGameThing)
 {
     m_pStaticGameThing = pStaticGameThing;
 }
 //================================================================================================================
-StaticGameThings * LabyrinthCell::GetStaticCellObject()
+GameThings *LabyrinthCell::GetStaticCellObject()
 {
     return m_pStaticGameThing;
 }

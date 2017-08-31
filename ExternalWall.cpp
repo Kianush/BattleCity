@@ -1,23 +1,22 @@
 #include "ExternalWall.h"
 #include "Bullet.h"
 //===============================================================================================================
-#include <QPainter>
+#include <QDeclarativeView>
+#include <QGraphicsObject>
 //===============================================================================================================
-ExternalWall::ExternalWall(const int &iColumn, const int &iRow) : StaticGameThings(iColumn, iRow)
+ExternalWall::ExternalWall(const int &iColumn, const int &iRow) : GameThings(iColumn, iRow)
 {
-
+    QString qmlObjectName = "c" + QString::number(iColumn) + "r" + QString::number(iRow);
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
+}
+//===============================================================================================================
+QString ExternalWall::GetStringImage() const
+{
+    return QString("Images/external_wall.png");
 }
 //===============================================================================================================
 ExternalWall::~ExternalWall()
 {
-
-}
-//===============================================================================================================
-void ExternalWall::Draw(QPainter *pPainter)
-{
-    QBrush theBrush(QColor(40, 40,40), Qt::SolidPattern);
-    pPainter->setBrush(theBrush);
-    pPainter->drawRect(m_iColumn*40 + m_iXdiplace, m_iRow*40 + m_iYdiplace,40,40);
 }
 //===============================================================================================================
 void ExternalWall::BulletHitHandler(Bullet * pBullet)

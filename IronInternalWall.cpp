@@ -1,30 +1,22 @@
 #include "IronInternalWall.h"
 #include "Bullet.h"
 //===============================================================================================================
-#include <QPainter>
+#include <QDeclarativeView>
+#include <QGraphicsObject>
 //===============================================================================================================
 IronInternalWall::IronInternalWall(const int &iColumn, const int &iRow) : ImplicitInternalWall(iColumn, iRow)
 {
-
+    QString qmlObjectName = "c" + QString::number(iColumn) + "r" + QString::number(iRow);
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
 }
 //===============================================================================================================
 IronInternalWall::~IronInternalWall()
 {
-
 }
 //===============================================================================================================
-void IronInternalWall::Draw(QPainter *pPainter)
+QString IronInternalWall::GetStringImage() const
 {
-    QBrush theBrush(QColor(150, 150, 150), Qt::NoBrush);
-    pPainter->setBrush(theBrush);
-    QPen pen;
-    pen.setColor(Qt::black);
-    pen.setWidth(1);
-    pPainter->setPen(pen);
-    pPainter->drawRect(m_iColumn*40 + m_iXdiplace, m_iRow*40 + m_iYdiplace,40,40);
-    theBrush.setStyle(Qt::BrushStyle::SolidPattern);
-    theBrush.setColor(Qt::black);
-    pPainter->drawRect(m_iColumn*40 + m_iXdiplace + 5, m_iRow*40 + m_iYdiplace + 5,30,30);
+    return QString("Images/iron_wall.png");
 }
 //===============================================================================================================
 void IronInternalWall::BulletHitHandler(Bullet * pBullet)

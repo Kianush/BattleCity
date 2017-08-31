@@ -2,33 +2,39 @@
 #include "ui_mainwindow.h"
 #include "Labyrinth.h"
 #include "GameStatistic.h"
+#include "MainDeclarativeView.h"
 //================================================================================================================
 #include <QKeyEvent>
 #include <QString>
 #include <QDebug>
 //================================================================================================================
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
-    ui->setupUi(this);
-    connect(ui->m_pqpbNewGame, SIGNAL(clicked()), this, SLOT(slotNewGame()));
-    ui->m_pqpbNewGame->setFocusPolicy(Qt::NoFocus);
-    ui->m_pqpbNewGame->setVisible(false);
+    m_pqdvUi = new MainDeclarativeView;
+    m_pqdvUi->setSource(QUrl("qrc:/qml/main.qml"));
+    setCentralWidget(m_pqdvUi);
+    m_pqdvUi->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+    m_pRoot = m_pqdvUi->rootObject();
+    m_pqdvUi->rootContext()->setContextProperty("window", this);
     m_pGameStatistic = new GameStatistic();
     const int  CODE_OWNER_OF_BULLETS_OF_ALIENS = 13;
-    Labyrinth::SetInternalStaticVariables(m_pGameStatistic, CODE_OWNER_OF_BULLETS_OF_ALIENS);
+    Labyrinth::SetInternalStaticVariables(m_pGameStatistic,
+                                          m_pqdvUi,
+                                          CODE_OWNER_OF_BULLETS_OF_ALIENS);
     SetGame();
 }
 //================================================================================================================
 MainWindow::~MainWindow()
 {
-    delete ui;
     if (nullptr != m_pLabyrinth) {
         delete m_pLabyrinth;
     }
     if (nullptr != m_pGameStatistic) {
         delete m_pGameStatistic;
+    }
+    if (nullptr != m_pqdvUi) {
+        delete m_pqdvUi;
     }
 }
 //================================================================================================================
@@ -38,20 +44,20 @@ void MainWindow::slotGameOver()
     m_pLabyrinth = nullptr;
     m_bGameStarted = false;
     m_pGameStatistic->SetHiScope(m_pGameStatistic->GetScope());
-    ui->m_pqlabeHiScope->setText(QString::number(m_pGameStatistic->GetHiScope()));
+    QString qmlObjectName = "game_over";
+    QObject * pQmlImage = m_pqdvUi->rootObject()->findChild<QObject*>(qmlObjectName);
     if (m_pGameStatistic->IsGameVictory()) {
-        ui->m_pqlabelGameResult->setText(QObject::tr("victory!"));
+        pQmlImage->setProperty("result",QObject::tr("victory!"));
     }
     else {
-        ui->m_pqlabelGameResult->setText(QObject::tr("fail!"));
+        pQmlImage->setProperty("result",QObject::tr("fail!"));
     }
-    ui->m_pqlabelSimleAliensKilled->setText(QString::number(m_pGameStatistic->GetSimpleAliensKilled()));
-    ui->m_pqlabelSpeedAliensKilled->setText(QString::number(m_pGameStatistic->GetSpeedAliensKilled()));
-    ui->m_pqlabelTotalKilled->setText(QString::number(m_pGameStatistic->GetTotalKilled()));
-    ui->m_pqlabelYourScope->setText(QString::number(m_pGameStatistic->GetScope()));
-
-    ui->m_pqpbNewGame->setVisible(true);
-    ui->m_pqpbNewGame->setFocusPolicy(Qt::NoFocus);
+    pQmlImage->setProperty("hi_scope", m_pGameStatistic->GetHiScope());
+    pQmlImage->setProperty("scope", m_pGameStatistic->GetScope());
+    pQmlImage->setProperty("simple_aliens_killed", m_pGameStatistic->GetSimpleAliensKilled());
+    pQmlImage->setProperty("speed_aliens_killed", m_pGameStatistic->GetSpeedAliensKilled());
+    pQmlImage->setProperty("visible", true);
+    m_pGameStatistic->Reset();
 }
 //================================================================================================================
 void MainWindow::slotNewGame()
@@ -71,8 +77,23 @@ void MainWindow::SetGame()
     m_bGameStarted = true;
     m_pLabyrinth = new Labyrinth(CELL_SIDE, this);
     m_pLabyrinth->setGeometry(0,0,WIDTH_GAME_MAP + 3*CELL_SIDE, HEIGHT_GAME_MAP);
+    m_pLabyrinth->setVisible(false);
     connect(m_pLabyrinth, SIGNAL(sigGameOver()), this, SLOT(slotGameOver()));
-    m_pLabyrinth->show();
-    m_pLabyrinth->setFocus();
+    MainDeclarativeView * pMainDeclarativeView = dynamic_cast<MainDeclarativeView*>(m_pqdvUi);
+    QString qmlObjectName = "game_over";
+    QObject * pQmlImage = pMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
+    if (nullptr != pQmlImage) {
+        pQmlImage->setProperty("visible", false);
+    }
+    if (nullptr != pMainDeclarativeView) {
+        connect(pMainDeclarativeView, SIGNAL(sigKeyPress(int)), m_pLabyrinth, SLOT(slotKeyPress(int)));
+        connect(pMainDeclarativeView, SIGNAL(sigKeyRelease(int)), m_pLabyrinth, SLOT(slotKeyRelease(int)));
+    }
+}
+//================================================================================================================
+void MainWindow::NewGameButtonQmlClick()
+{
+    slotGameOver();
+    SetGame();
 }
 //================================================================================================================

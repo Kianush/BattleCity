@@ -1,41 +1,52 @@
 #ifndef GAMETHINGS_H
 #define GAMETHINGS_H
 //=================================================================================================================
-class QPainter;
 class Bullet;
 class DynamicGameThings;
 class GameStatistic;
+class QDeclarativeView;
+class QString;
+class QObject;
 //=================================================================================================================
 class GameThings
 {
 public:
     GameThings(const int &iColumn, const int &iRow);
     virtual ~GameThings();
-    virtual void Draw(QPainter *pPainter) = 0;
+    virtual void Draw();
+    virtual QString GetStringImage() const = 0;
     virtual void BulletHitHandler(Bullet * pBullet) = 0;
     virtual bool CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings);
-    virtual void PlaySoundAtBornMoment() = 0;
-    virtual void PlaySoundAtDeadMoment() = 0;
-    int GetColumn() const {return m_iColumn;}
-    void SetColumn(const int &iColumn) {m_iColumn = iColumn;}
-    int GetRow() const {return m_iRow;}
-    void SetRow(const int &iRow) {m_iRow = iRow;}
-    int GetXdiplace() const {return m_iXdiplace;}
-    void SetXdiplace(const int &iXdiplace) {m_iXdiplace = iXdiplace;}
-    int GetYdiplace() const {return m_iYdiplace;}
-    void SetYdiplace(const int &iYdiplace) {m_iYdiplace = iYdiplace;}
+    void SetColumn(const int &iColumn);
+    void SetXdiplace(const int &iXdiplace);
+    void SetYdiplace(const int &iYdiplace);
+    void SetRow(const int &iRow);
+    int GetColumn() const;
+    int GetRow() const;
+    int GetXdiplace() const;
+    int GetYdiplace() const;
+    int GetLiveHits() const;
     static void SetCellSizeOfSide(const int &iCellSizeOfSide);
     static void SetPointerGameStatistic(GameStatistic * psGameStatistic);
+    static void SetPointerMainDeclarativeView(QDeclarativeView *pMainDeclarativeView);
     static GameStatistic * GetPointerGameStatistic();
 protected:
     int m_iColumn;
     int m_iRow;
     int m_iXdiplace;
     int m_iYdiplace;
+    void SetLiveHits(const int &iLiveHits);
+    void DecrementLiveHits();
     static int GetCellSide();
+    //QObject * GetQmlImage();
+    QObject * m_pQmlImage;
     static GameStatistic * m_psGameStatistic;
+    static QDeclarativeView * m_psMainDeclarativeView;
+    virtual int GetX() const;
+    virtual int GetY() const;
 private:
     static int m_siCellSizeOfSide;
+    int m_iLiveHits;
 };
 //=================================================================================================================
 #endif // GAMETHINGS_H

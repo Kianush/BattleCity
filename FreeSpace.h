@@ -1,22 +1,23 @@
 #ifndef FREESPACE_H
 #define FREESPACE_H
 //===============================================================================================================
-#include "StaticGameThings.h"
+#include "GameThings.h"
 //===============================================================================================================
-class QPainter;
 class Bullet;
 class DynamicGameThings;
+//class QObject;
 //==================================================================================================================
-class FreeSpace : public StaticGameThings
+class FreeSpace : public GameThings
 {
 public:
     FreeSpace(const int &iColumn, const int &iRow);
-    ~FreeSpace();
-    virtual void Draw(QPainter *pPainter);
+    virtual ~FreeSpace();
+    virtual QString GetStringImage() const;
+    //virtual void Draw();
     virtual void BulletHitHandler(Bullet * pBullet);
-    virtual void PlaySoundAtBornMoment() {}
-    virtual void PlaySoundAtDeadMoment() {}
     virtual bool CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings);
+//private:
+//    QObject * m_pQmlImage;
 };
 //==================================================================================================================
 #endif // FREESPACE_H

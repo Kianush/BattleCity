@@ -1,0 +1,40 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/Images/external_wall.png</file>
+        <file>qml/Images/free_space.png</file>
+        <file>qml/Images/internal_wall.png</file>
+        <file>qml/Images/flag_prize.png</file>
+        <file>qml/Images/iron_wall.png</file>
+        <file>qml/Images/internal_wall_1.png</file>
+        <file>qml/Images/internal_wall_2.png</file>
+        <file>qml/Images/alien_panzer_east.png</file>
+        <file>qml/Images/alien_panzer_nord.png</file>
+        <file>qml/Images/alien_panzer_south.png</file>
+        <file>qml/Images/alien_panzer_west.png</file>
+        <file>qml/Images/our_panzer_east.png</file>
+        <file>qml/Images/our_panzer_nord.png</file>
+        <file>qml/Images/our_panzer_south.png</file>
+        <file>qml/Images/our_panzer_west.png</file>
+        <file>qml/Images/bullet_east.png</file>
+        <file>qml/Images/bullet_nord.png</file>
+        <file>qml/Images/bullet_south.png</file>
+        <file>qml/Images/bullet_west.png</file>
+        <file>qml/Images/pulse_1.png</file>
+        <file>qml/Images/pulse_2.png</file>
+        <file>qml/Images/kill_them_all.png</file>
+        <file>qml/Images/plus_100.png</file>
+        <file>qml/Images/plus_200.png</file>
+        <file>qml/Images/plus_500.png</file>
+        <file>qml/GameCell.qml</file>
+        <file>qml/GameOver.qml</file>
+        <file>audio/shot.wav</file>
+        <file>qml/Images/kill_them_all_empty.png</file>
+        <file>audio/explosion.wav</file>
+        <file>audio/get_prize.wav</file>
+        <file>audio/our_move.wav</file>
+        <file>audio/our_stop.wav</file>
+        <file>audio/rotate.wav</file>
+        <file>qml/Images/froze.png</file>
+    </qresource>
+</RCC>

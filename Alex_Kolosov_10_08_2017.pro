@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui declarative multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug_and_release c++11
 
-TARGET = Alex_Kolosov_10_08_2017
+TARGET = BattleCity
 TEMPLATE = app
 
 
@@ -18,10 +18,8 @@ SOURCES += main.cpp\
     Labyrinth.cpp \
     LabyrinthCell.cpp \
     AlienPanzers.cpp \
-    PanzersPathes.cpp \
     Bullet.cpp \
     DynamicGameThings.cpp \
-    StaticGameThings.cpp \
     ExternalWall.cpp \
     InternalWall.cpp \
     FreeSpace.cpp \
@@ -30,21 +28,20 @@ SOURCES += main.cpp\
     GameThings.cpp \
     PrizesThings.cpp \
     KillThemAllPrize.cpp \
-    PrizesPathes.cpp \
     OurPanzer.cpp \
     FlagPrize.cpp \
     GameStatistic.cpp \
-    SpeedAlienPanzer.cpp
+    SpeedAlienPanzer.cpp \
+    MainDeclarativeView.cpp \
+    FrozePrize.cpp
 
 HEADERS  += mainwindow.h \
     Labyrinth.h \
     LabyrinthCell.h \
     GameThings.h \
     AlienPanzers.h \
-    PanzersPathes.h \
     Bullet.h \
     DynamicGameThings.h \
-    StaticGameThings.h \
     ExternalWall.h \
     InternalWall.h \
     FreeSpace.h \
@@ -52,10 +49,20 @@ HEADERS  += mainwindow.h \
     IronInternalWall.h \
     PrizesThings.h \
     KillThemAllPrize.h \
-    PrizesPathes.h \
     OurPanzer.h \
     GameStatistic.h \
     SpeedAlienPanzer.h \
-    FlagPrize.h
+    FlagPrize.h \
+    MainDeclarativeView.h \
+    FrozePrize.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES += \
+    qml/main.qml \
+    qml/GameCell.qml \
+    qml/GameOver.qml \
+    qml/Alien.qml
+
+RESOURCES += \
+    res.qrc

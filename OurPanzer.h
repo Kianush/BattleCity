@@ -10,7 +10,6 @@ class OurPanzer : public AlienPanzer
 public:
     OurPanzer(const int &iColumn, const int &iRow);
     virtual ~OurPanzer();
-    virtual void Draw(QPainter *pPainter);
     virtual Bullet * Shoot();
     virtual void BulletHitHandler(Bullet * pBullet);
     virtual void Move(bool &bCellChange);
@@ -18,8 +17,11 @@ public:
     QRectF GetBoundingRect();
     bool IsShooting() const;
     void UnsetShootingSign();
+    bool CanMoveIntoCurrentCell() const;
     static int GetLiveCount();
     static void SetLiveCount(const int &iLiveCount);
+protected:
+    virtual QString GetStringImage() const;
 private:
     int GetMyCodeOfBullet() const;
     bool m_bStoping;

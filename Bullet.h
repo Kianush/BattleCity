@@ -3,6 +3,8 @@
 //=================================================================================================================
 #include "DynamicGameThings.h"
 //=================================================================================================================
+class QObject;
+//=================================================================================================================
 class Bullet : public DynamicGameThings
 {
 public:
@@ -10,11 +12,10 @@ public:
            const int &iXDiplace, const int &iYdiplace,
            const int &iVelosity, const DynamicGameThings::Orientation &eOrientation);
     virtual ~Bullet();
-    virtual void Draw(QPainter *pPainter);
-    virtual void PlaySoundAtBornMoment(){}
-    virtual void PlaySoundAtDeadMoment(){}
+//    virtual void Draw();
     virtual void Move(bool &bCellChange);
     virtual void BulletHitHandler(Bullet * pBullet);
+    virtual QString GetStringImage() const;
     bool IsMarkedToDelete() const;
     void MarkToDelete();
     int GetCodeOwner() const {return m_iCodeOwnersOfTheBullet;}
@@ -22,10 +23,20 @@ public:
     DynamicGameThings * GetPointerParent() {return m_pParent;}
     void SetParent(DynamicGameThings * pParent);
     DynamicGameThings::Orientation GetMoveOrientation() const;
+    virtual int GetWidth() const;
+    virtual int GetHeight() const;
+    static void SetDimensionsOfBullet(const int &iWidth, const int &iHeight);
+protected:
+    virtual int GetX() const;
+    virtual int GetY() const;
 private:
     bool m_bMarkToDelete;
     int m_iCodeOwnersOfTheBullet;
     DynamicGameThings * m_pParent;
+    static int m_siNumberOfBullet;
+    static int m_siBulletWidth;
+    static int m_siBulletHeight;
+//    QObject * m_pQmlImage;
 };
 //=================================================================================================================
 #endif // BULLET_H

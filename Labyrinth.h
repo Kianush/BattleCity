@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QList>
 //=================================================================================================================
-/// @brief decrarations
 class LabyrinthCell;
 class GameThings;
 class AlienPanzer;
@@ -14,6 +13,8 @@ class Prize;
 class Bullet;
 class FlagPrize;
 class GameStatistic;
+class QDeclarativeView;
+class QSound;
 //=================================================================================================================
 class Labyrinth : public QWidget
 {
@@ -22,20 +23,23 @@ public:
     Labyrinth(const int iSizeOfSideOfCell,
               QWidget * pParent = nullptr);
     virtual ~Labyrinth();
-    void draw(QPainter *pPainter);
+
     void KillAllAliens();
+    void FrozeAliens();
     static void SetDimension(const int &iQuantityRows, const int &iQuantityColumns);
     static void SetInternalStaticVariables(GameStatistic *pGameStatistic,
+                                           QDeclarativeView *pMainDeclarativeView,
                                            const int &iOwnerCodeOfBulletsOfAliens);
     void DoGameOver();
+public slots:
+    void slotKeyPress(const int &iKey);
+    void slotKeyRelease(const int &iKey);
 signals:
     void sigGameOver();
 protected:
     virtual void timerEvent(QTimerEvent * pTimerEvent);
-    virtual void paintEvent(QPaintEvent * pPaintEvent);
-    virtual void keyPressEvent(QKeyEvent * pKeyEvent);
-    virtual void keyReleaseEvent(QKeyEvent * pKeyEvent);
 private:
+    void Draw();
     void BuildExternalWalls();
     void BuildInternalWalls();
     void SetNeighbours();
@@ -46,8 +50,18 @@ private:
     void CreateOurFlag();
     void CreatePrize();
     int DecrementDeadTime(const int &iTick);
+    void DecrementFrozeTime(const int &iTick);
     void ExitLevel();
     void Clean();
+    void OursStepInGame();
+    void AliensStepInGame(const int &iTime);
+    void PrizesStepInGame(const int &iTime);
+    void BulletsStepInGame();
+    void CleanOursStepInGame();
+    void CleanAliensStepInGame();
+    void CleanPrizesStepInGame();
+    void CleanBulletsStepInGame();
+
     static bool CellLessThan(const QPoint &p1, const QPoint &p2);
 private:
     static int m_siCellsInRowQuantity;
@@ -63,7 +77,11 @@ private:
     int m_iGameTick;
     int m_iTimerId;
     bool m_bGameOver;
+    bool m_bFrozeAliens;
+    int m_iTimeFroze;
     GameStatistic * m_pGameStatistic;
+    QSound * m_pSound_Move;
+    QSound * m_pSound_Stop;
 };
 //=================================================================================================================
 #endif // LABIRINTH_H

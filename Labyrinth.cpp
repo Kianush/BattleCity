@@ -6,8 +6,8 @@
 #include "PrizesThings.h"
 #include "FlagPrize.h"
 #include "KillThemAllPrize.h"
+#include "FrozePrize.h"
 #include "Bullet.h"
-#include "StaticGameThings.h"
 #include "ExternalWall.h"
 #include "FreeSpace.h"
 #include "InternalWall.h"
@@ -18,6 +18,8 @@
 #include <QDebug>
 #include <QPoint>
 #include <QKeyEvent>
+#include <MainDeclarativeView.h>
+#include <QSound>
 //===============================================================================================================
 int Labyrinth::m_siCellsInColumnQuantity;
 int Labyrinth::m_siCellsInRowQuantity;
@@ -29,15 +31,15 @@ void Labyrinth::SetDimension(const int &iQuantityRows, const int &iQuantityColum
 }
 //===============================================================================================================
 void Labyrinth::SetInternalStaticVariables(GameStatistic * pGameStatistic,
+                                           QDeclarativeView * pMainDeclarativeView,
                                            const int &iOwnerCodeOfBulletsOfAliens)
 {
     GameThings::SetCellSizeOfSide(40);
     GameThings::SetPointerGameStatistic(pGameStatistic);
-    AlienPanzer::SetRotatedSimpleAlienPathes();
+    GameThings::SetPointerMainDeclarativeView(pMainDeclarativeView);
     AlienPanzer::SetCodeOwnerOfBullets(iOwnerCodeOfBulletsOfAliens);
-    KillThemAllPrize::SetKillThemAllPrizePath();
-    FlagPrize::SetFlagPrizePath();
-
+    AlienPanzer::SetDimensionsOfMainImage(27, 35);
+    Bullet::SetDimensionsOfBullet(5,5);
 }
 //===============================================================================================================
 Labyrinth::Labyrinth(const int iSizeOfSideOfCell, QWidget *pParent) : QWidget(pParent)
@@ -55,11 +57,17 @@ Labyrinth::Labyrinth(const int iSizeOfSideOfCell, QWidget *pParent) : QWidget(pP
     CreateOurFlag();
     CreateAliens();
     CreatePrize();
+    m_pOurPanzer = nullptr;
     CreateOur();
 
     m_iGameTick = 40;
 
     m_iTimerId = startTimer(m_iGameTick);
+    m_pSound_Move = new QSound(":/audio/our_move.wav", this);
+    m_pSound_Stop = new QSound(":/audio/our_stop.wav", this);
+    m_pSound_Move->setLoops(QSound::Infinite);
+    m_pSound_Stop->setLoops(QSound::Infinite);
+    m_pSound_Stop->play();
 }
 //===============================================================================================================
 Labyrinth::~Labyrinth()
@@ -108,95 +116,84 @@ void Labyrinth::Clean()
     if (nullptr != m_pOurFlag) {
         delete m_pOurFlag;
     }
+    delete m_pSound_Move;
+    delete m_pSound_Stop;
 }
 //===============================================================================================================
-void Labyrinth::draw(QPainter *pPainter)
+void Labyrinth::Draw()
 {
     for(int column_count = 0; column_count < m_qvec_LabyrinthCell.size(); ++column_count) {
         foreach (LabyrinthCell * pLabyrinthCell, m_qvec_LabyrinthCell[column_count]) {
             if (nullptr != pLabyrinthCell->GetStaticCellObject()) {
-                pLabyrinthCell->GetStaticCellObject()->Draw(pPainter);
+                pLabyrinthCell->GetStaticCellObject()->Draw();
             }
         }
     }
     foreach (Prize * pPrize, m_qlist_Prizes) {
-        pPrize->Draw(pPainter);
+        pPrize->Draw();
     }
 
     foreach (AlienPanzer * pAlienPanzer, m_qlist_Aliens) {
-        pAlienPanzer->Draw(pPainter);
+        pAlienPanzer->Draw();
     }
     foreach (AlienPanzer * pAlienPanzer, m_qlist_ExternalAliens) {
-        pAlienPanzer->Draw(pPainter);
+        pAlienPanzer->Draw();
     }
     foreach (Bullet * pBullet, m_qlist_Bullets) {
-        pBullet->Draw(pPainter);
+        pBullet->Draw();
     }
     if (m_pOurPanzer) {
-        m_pOurPanzer->Draw(pPainter);
+        m_pOurPanzer->Draw();
     }
     if (nullptr != m_pOurFlag) {
-        m_pOurFlag->Draw(pPainter);
+        m_pOurFlag->Draw();
     }
 }
 //===============================================================================================================
-void Labyrinth::paintEvent(QPaintEvent * pPaintEvent)
-{
-    Q_UNUSED(pPaintEvent);
-    QPainter thePainter(this);
-    if(!thePainter.isActive()) return;
-    thePainter.setRenderHint(QPainter::Antialiasing);
-    draw(&thePainter);
-}
-//===============================================================================================================
-void Labyrinth::keyPressEvent(QKeyEvent * pKeyEvent)
+void Labyrinth::slotKeyPress(const int &iKey)
 {
     if (m_pOurPanzer != nullptr) {
         const int DEFAULT_OUR_VELOSITY = 5;
-        if (pKeyEvent->key() == Qt::Key_Space) {
-            if (!m_pOurPanzer->IsShooting() && !pKeyEvent->isAutoRepeat()) {
+        if (iKey == Qt::Key_Space) {
+            if (!m_pOurPanzer->IsShooting()) {
                 m_qlist_Bullets.push_back(m_pOurPanzer->Shoot());
             }
         }
-        if (pKeyEvent->key() == Qt::Key_Up) {
+        if (iKey == Qt::Key_Up || iKey == Qt::Key_Down || iKey == Qt::Key_Left || iKey == Qt::Key_Right) {
+            m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
+            m_pSound_Stop->stop();
+            m_pSound_Move->play();
+        }
+        if (iKey == Qt::Key_Up) {
             m_pOurPanzer->SetOrientation(DynamicGameThings::Up);
-            m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
         }
-        if(pKeyEvent->key() == Qt::Key_Down) {
+        if(iKey == Qt::Key_Down) {
             m_pOurPanzer->SetOrientation(DynamicGameThings::Down);
-            m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
         }
-        if(pKeyEvent->key() == Qt::Key_Left) {
+        if(iKey == Qt::Key_Left) {
             m_pOurPanzer->SetOrientation(DynamicGameThings::Left);
-            m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
         }
-        if(pKeyEvent->key() == Qt::Key_Right) {
+        if(iKey == Qt::Key_Right) {
             m_pOurPanzer->SetOrientation(DynamicGameThings::Right);
-            m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
         }
     }
-    QWidget::keyPressEvent(pKeyEvent);
 }
 //===============================================================================================================
-void Labyrinth::keyReleaseEvent(QKeyEvent * pKeyEvent)
+void Labyrinth::slotKeyRelease(const int &iKey)
 {
     if (m_pOurPanzer != nullptr) {
-        if (pKeyEvent->key() == Qt::Key_Up ||
-            pKeyEvent->key() == Qt::Key_Down ||
-            pKeyEvent->key() == Qt::Key_Left ||
-            pKeyEvent->key() == Qt::Key_Right)
+        if (iKey == Qt::Key_Up || iKey == Qt::Key_Down || iKey == Qt::Key_Left || iKey == Qt::Key_Right)
         {
             m_pOurPanzer->SetVelosity(0);
+            m_pSound_Stop->play();
+            m_pSound_Move->stop();
         }
-        else if (pKeyEvent->key() == Qt::Key_Space) {
-            if (!pKeyEvent->isAutoRepeat()) {
+        else if (iKey == Qt::Key_Space) {
                 m_pOurPanzer->UnsetShootingSign();
-            }
         }
         else {}
     }
     else {}
-    QWidget::keyReleaseEvent(pKeyEvent);
 }
 //===============================================================================================================
 void Labyrinth::CreateCells()
@@ -216,6 +213,7 @@ void Labyrinth::CreateCells()
 void Labyrinth::CreateAliens()
 {
     AlienPanzer::SetQuantitySimpleAliens(20);
+    AlienPanzer::ResetAliensInGame(0);
     AlienPanzer ** pArrayAliens = new AlienPanzer*[AlienPanzer::GetQuantitySimpleAliens()];
     for(int alien_count = 0; alien_count < AlienPanzer::GetQuantitySimpleAliens(); alien_count = alien_count + 2) {
         if (alien_count != 0) {
@@ -280,7 +278,13 @@ bool Labyrinth::CreateOur()
 //===============================================================================================================
 void Labyrinth::CreatePrize()
 {
-    Prize * pPrize = new KillThemAllPrize(7, 6, this);
+    Prize * pPrize;
+    if (rand() % 2 == 0) {
+        pPrize = new KillThemAllPrize(7, 6, this);
+    }
+    else {
+        pPrize = new FrozePrize(1, 11, this);
+    }
     pPrize->SetPrizeCost(500);
     m_qlist_Prizes.push_back(pPrize);
 }
@@ -318,16 +322,40 @@ void Labyrinth::KillAllAliens()
 {
     auto it_first = m_qlist_Aliens.begin();
     auto it_end = m_qlist_Aliens.end();
+    bool bAtLeastOne = false;
     while (it_first!=it_end) {
         (*it_first)->MarkToDelete();
+        bAtLeastOne = true;
         ++it_first;
+    }
+    if (bAtLeastOne) {
+        QSound::play(":/audio/explosion.wav");
+    }
+}
+//===============================================================================================================
+void Labyrinth::FrozeAliens()
+{
+    foreach (AlienPanzer * pAlienPanzer, m_qlist_Aliens) {
+        pAlienPanzer->SetFrozen(true);
+    }
+    m_bFrozeAliens = true;
+    m_iTimeFroze = m_iGameTick * 150;
+}
+//===============================================================================================================
+void Labyrinth::DecrementFrozeTime(const int &iTick)
+{
+    if (m_bFrozeAliens) {
+        m_iTimeFroze -= iTick;
+        if (m_iTimeFroze < 0) {
+            m_bFrozeAliens = false;
+        }
     }
 }
 //===============================================================================================================
 void Labyrinth::BuildExternalWalls()
 {
 
-    StaticGameThings * pStaticGameThings = new ExternalWall(0,0);
+    GameThings * pStaticGameThings = new ExternalWall(0,0);
     m_qvec_LabyrinthCell[0][0]->SetStaticCellObject(pStaticGameThings);
     pStaticGameThings = new ExternalWall(m_siCellsInColumnQuantity - 1,0);
     m_qvec_LabyrinthCell[m_siCellsInColumnQuantity - 1][0]->SetStaticCellObject(pStaticGameThings);
@@ -456,7 +484,7 @@ void Labyrinth::BuildInternalWalls()
     }
     qSort(qvecFreeSpace.begin(), qvecFreeSpace.end(), CellLessThan);
 
-    StaticGameThings * pStaticGameThings;
+    GameThings * pStaticGameThings;
     int iC, iR;
     for(int cell = 0; cell < qvecInternalStoneWallsCellIndex.size(); ++cell) {
         iC = qvecInternalStoneWallsCellIndex[cell].x();
@@ -524,27 +552,14 @@ void Labyrinth::SetNeighbours()
     }
 }
 //===============================================================================================================
-void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
+void Labyrinth::OursStepInGame()
 {
-    static int iTime = 0;
-    if (m_bGameOver) {
-        if (DecrementDeadTime(m_iGameTick) < 0) {
-            ExitLevel();
-            return;
-        }
-    }
-    if (AlienPanzer::GetQuantitySimpleAliens() == 0) {
-        DoGameOver();
-    }
-    if (nullptr == m_pOurPanzer) {
-        if(!CreateOur()) {}
-    }
-
     if (nullptr != m_pOurPanzer) {
         int c = m_pOurPanzer->GetColumn();
         int r = m_pOurPanzer->GetRow();
         m_qvec_LabyrinthCell[c][r]->SetDynamicCellObject(m_pOurPanzer);
-        if(m_pOurPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r])) {
+        if(m_pOurPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r]) ||
+           m_pOurPanzer->CanMoveIntoCurrentCell()) {
             bool bCellChange = false;
             m_pOurPanzer->Move(bCellChange);
             if (bCellChange) {
@@ -556,9 +571,11 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
 
         }
     }
-    PlacingAlienInGame(iTime);
-    iTime += m_iGameTick;
-
+}
+//===============================================================================================================
+void Labyrinth::AliensStepInGame(const int &iTime)
+{
+    DecrementFrozeTime(m_iGameTick);
     foreach (AlienPanzer * pAlienPanzer, m_qlist_Aliens) {
         int c = pAlienPanzer->GetColumn();
         int r = pAlienPanzer->GetRow();
@@ -566,9 +583,8 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
             m_qvec_LabyrinthCell[c][r]->SetDynamicCellObject(pAlienPanzer);
         }
     }
-
     foreach (AlienPanzer * pAlienPanzer, m_qlist_Aliens) {
-        if (!pAlienPanzer->IsDead() && !pAlienPanzer->IsBorning()) {
+        if (!pAlienPanzer->IsDead() && !pAlienPanzer->IsBorning() && !m_bFrozeAliens) {
             int c = pAlienPanzer->GetColumn();
             int r = pAlienPanzer->GetRow();
             if (c < m_siCellsInColumnQuantity && r < m_siCellsInRowQuantity) {
@@ -589,19 +605,25 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
                     m_qlist_Bullets.push_back(pAlienPanzer->Shoot());
                 }
             }
-
         }
         else if (pAlienPanzer->IsDead()){
             pAlienPanzer->DecrementShowCostTime();
         }
-        else if (pAlienPanzer->IsBorning()) {
+        else if (pAlienPanzer->IsBorning() && !m_bFrozeAliens) {
             pAlienPanzer->DecreaseBornTime(m_iGameTick);
         }
+    }
+}
+//===============================================================================================================
+void Labyrinth::PrizesStepInGame(const int &iTime)
+{
+    if(iTime > 0 && (iTime % (m_iGameTick*1000) == 0)) {
+        CreatePrize();
     }
     foreach (Prize * pPrize, m_qlist_Prizes) {
         if (!pPrize->IsMarkedToDelete()) {
             pPrize->DecrementLiveTime();
-            if (!pPrize->IsEffect()) {
+            if (!pPrize->IsEffect() && nullptr != m_pOurPanzer) {
                 pPrize->OurPanzerHanler(m_pOurPanzer);
             }
             else {
@@ -609,6 +631,10 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
             }
         }
     }
+}
+//===============================================================================================================
+void Labyrinth::BulletsStepInGame()
+{
     foreach (Bullet * pBullet, m_qlist_Bullets) {
 
         bool bCellChange = false;
@@ -627,50 +653,10 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
             }
         }
     }
-    auto it_first_prize = m_qlist_Prizes.begin();
-    auto it_end_prize = m_qlist_Prizes.end();
-    while(it_first_prize != it_end_prize) {
-        if ((*it_first_prize)->IsMarkedToDelete()) {
-            Prize * pPrize = (*it_first_prize);
-            delete pPrize;
-            m_qlist_Prizes.erase(it_first_prize);
-            it_first_prize = m_qlist_Prizes.begin();
-            it_end_prize = m_qlist_Prizes.end();
-            continue;
-        }
-        it_first_prize++;
-    }
-    auto it_first_bullet = m_qlist_Bullets.begin();
-    auto it_end_bullet = m_qlist_Bullets.end();
-    while (it_first_bullet != it_end_bullet) {
-        if ((*it_first_bullet)->IsMarkedToDelete()) {
-            Bullet * pBullet = (*it_first_bullet);
-            delete pBullet;
-            m_qlist_Bullets.erase(it_first_bullet);
-            it_first_bullet = m_qlist_Bullets.begin();
-            it_end_bullet = m_qlist_Bullets.end();
-            continue;
-        }
-        it_first_bullet++;
-    }
-    auto it_first_alien = m_qlist_Aliens.begin();
-    auto it_end_alien = m_qlist_Aliens.end();
-    while (it_first_alien != it_end_alien) {
-        if ((*it_first_alien)->IsMarkedToDelete()) {
-           AlienPanzer * pAlienPanzer = (*it_first_alien);
-           for(int c = pAlienPanzer->GetColumn() - 1; c <= pAlienPanzer->GetColumn() + 1; ++c) {
-               for(int r = pAlienPanzer->GetRow() - 1; r <= pAlienPanzer->GetRow() + 1; ++r) {
-                   m_qvec_LabyrinthCell[c][r]->RemoveDynamicGameThings(pAlienPanzer);
-               }
-           }
-           delete pAlienPanzer;
-           m_qlist_Aliens.erase(it_first_alien);
-           it_first_alien = m_qlist_Aliens.begin();
-           it_end_alien = m_qlist_Aliens.end();
-           continue;
-        }
-        it_first_alien++;
-    }
+}
+//===============================================================================================================
+void Labyrinth::CleanOursStepInGame()
+{
     if ((nullptr != m_pOurPanzer) && m_pOurPanzer->IsMarkedToDelete()) {
         for(int c = m_pOurPanzer->GetColumn() - 1; c <= m_pOurPanzer->GetColumn() + 1; ++c) {
             for(int r = m_pOurPanzer->GetRow() - 1; r <= m_pOurPanzer->GetRow() + 1; ++r) {
@@ -686,7 +672,94 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
             m_pOurFlag = nullptr;
         }
     }
-    repaint();
-    QWidget::timerEvent(pTimerEvent);
+}
+//===============================================================================================================
+void Labyrinth::CleanAliensStepInGame()
+{
+    auto it_first_alien = m_qlist_Aliens.begin();
+    auto it_end_alien = m_qlist_Aliens.end();
+    while (it_first_alien != it_end_alien) {
+        if ((*it_first_alien)->IsMarkedToDelete()) {
+           AlienPanzer * pAlienPanzer = (*it_first_alien);
+           for(int c = pAlienPanzer->GetColumn() - 1; c <= pAlienPanzer->GetColumn() + 1; ++c) {
+               for(int r = pAlienPanzer->GetRow() - 1; r <= pAlienPanzer->GetRow() + 1; ++r) {
+                   m_qvec_LabyrinthCell[c][r]->RemoveDynamicGameThings(pAlienPanzer);
+               }
+           }
+           AlienPanzer::DecrementQuantityAliens();
+           delete pAlienPanzer;
+           m_qlist_Aliens.erase(it_first_alien);
+           it_first_alien = m_qlist_Aliens.begin();
+           it_end_alien = m_qlist_Aliens.end();
+           continue;
+        }
+        it_first_alien++;
+    }
+}
+//===============================================================================================================
+void Labyrinth::CleanPrizesStepInGame()
+{
+    auto it_first_prize = m_qlist_Prizes.begin();
+    auto it_end_prize = m_qlist_Prizes.end();
+    while(it_first_prize != it_end_prize) {
+        if ((*it_first_prize)->IsMarkedToDelete()) {
+            Prize * pPrize = (*it_first_prize);
+            delete pPrize;
+            m_qlist_Prizes.erase(it_first_prize);
+            it_first_prize = m_qlist_Prizes.begin();
+            it_end_prize = m_qlist_Prizes.end();
+            continue;
+        }
+        it_first_prize++;
+    }
+}
+//===============================================================================================================
+void Labyrinth::CleanBulletsStepInGame()
+{
+    auto it_first_bullet = m_qlist_Bullets.begin();
+    auto it_end_bullet = m_qlist_Bullets.end();
+    while (it_first_bullet != it_end_bullet) {
+        if ((*it_first_bullet)->IsMarkedToDelete()) {
+            Bullet * pBullet = (*it_first_bullet);
+            delete pBullet;
+            m_qlist_Bullets.erase(it_first_bullet);
+            it_first_bullet = m_qlist_Bullets.begin();
+            it_end_bullet = m_qlist_Bullets.end();
+            continue;
+        }
+        it_first_bullet++;
+    }
+}
+//===============================================================================================================
+void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
+{
+    static int iTime = 0;
+    if (m_bGameOver) {
+        if (DecrementDeadTime(m_iGameTick) < 0) {
+            ExitLevel();
+            return;
+        }
+    }
+    if (AlienPanzer::GetQuantitySimpleAliens() == 0) {
+        DoGameOver();
+    }
+    if (nullptr == m_pOurPanzer) {
+        if(!CreateOur()) {}
+    }
+    OursStepInGame();
+    PlacingAlienInGame(iTime);
+
+    iTime += m_iGameTick;
+
+    AliensStepInGame(iTime);
+    PrizesStepInGame(iTime);
+    BulletsStepInGame();
+
+    CleanPrizesStepInGame();
+    CleanBulletsStepInGame();
+    CleanAliensStepInGame();
+    CleanOursStepInGame();
+    Draw();
+    QObject::timerEvent(pTimerEvent);
 }
 //===============================================================================================================

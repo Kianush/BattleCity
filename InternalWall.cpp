@@ -3,12 +3,13 @@
 #include "ImplicitInternalWall.h"
 #include "Bullet.h"
 //===============================================================================================================
-#include <QPainter>
+#include <QSound>
 //===============================================================================================================
-InternalWall::InternalWall(const int &iColumn, const int &iRow) : StaticGameThings(iColumn, iRow)
+InternalWall::InternalWall(const int &iColumn, const int &iRow) : GameThings(iColumn, iRow)
 {
     m_pImplicitStaticGameThings = new ImplicitInternalWall(iColumn, iRow);
-    m_iLiveHits = 2;
+    SetLiveHits(2);
+    m_pQmlImage = nullptr;
 }
 //===============================================================================================================
 InternalWall::~InternalWall()
@@ -16,26 +17,21 @@ InternalWall::~InternalWall()
     delete m_pImplicitStaticGameThings;
 }
 //===============================================================================================================
-void InternalWall::Draw(QPainter *pPainter)
+void InternalWall::Draw()
 {
-    m_pImplicitStaticGameThings->Draw(pPainter);
+    m_pImplicitStaticGameThings->Draw();
 }
 //===============================================================================================================
-void InternalWall::PlaySoundAtBornMoment()
+QString InternalWall::GetStringImage() const
 {
-    m_pImplicitStaticGameThings->PlaySoundAtBornMoment();
-}
-//===============================================================================================================
-void InternalWall::PlaySoundAtDeadMoment()
-{
-    m_pImplicitStaticGameThings->PlaySoundAtDeadMoment();
+    return m_pImplicitStaticGameThings->GetStringImage();
 }
 //===============================================================================================================
 void InternalWall::BulletHitHandler(Bullet * pBullet)
 {
     m_pImplicitStaticGameThings->BulletHitHandler(pBullet);
-    m_iLiveHits--;
-    if (m_iLiveHits < 0) {
+    if (m_pImplicitStaticGameThings->GetLiveHits() < 0) {
+        QSound::play(":/audio/explosion.wav");
         delete m_pImplicitStaticGameThings;
         m_pImplicitStaticGameThings = new FreeSpace(m_iColumn, m_iRow);
     }

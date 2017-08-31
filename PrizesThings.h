@@ -1,11 +1,11 @@
 #ifndef PRIZESTHINGS_H
 #define PRIZESTHINGS_H
 //===============================================================================================================
-#include "StaticGameThings.h"
+#include "GameThings.h"
 //===============================================================================================================
 class OurPanzer;
 //===============================================================================================================
-class Prize : public StaticGameThings
+class Prize : public GameThings
 {
 public:
     Prize(const int &iColumn, const int &iRow);
@@ -16,12 +16,11 @@ public:
     void DecrementShowPrizeCostTime();
     void DecrementLiveTime();
     void MarkToDelete();
-    virtual void PlaySoundAtBornMoment() {}
-    virtual void PlaySoundAtDeadMoment() {}
     virtual bool CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings);
     virtual void BulletHitHandler(Bullet * pBullet);
     virtual bool OurPanzerHanler(OurPanzer * pOurPanzer);
-    bool IsEffect();
+    virtual QString GetStringImage() const;
+    bool IsEffect() const;
 private:
     int m_iPrizeCost;
     bool m_bIsMarkedToDelete;

@@ -3,19 +3,35 @@
 #include "Bullet.h"
 #include "GameStatistic.h"
 //================================================================================================================
-#include <QPainter>
+#include <QDeclarativeView>
+#include <QGraphicsObject>
+#include <QSound>
 //================================================================================================================
-AlienPath AlienPanzer::m_sAlienPainterPathLeft;
-AlienPath AlienPanzer::m_sAlienPainterPathRight;
-AlienPath AlienPanzer::m_sAlienPainterPathUp;
-AlienPath AlienPanzer::m_sAlienPainterPathDown;
-AlienBornPath AlienPanzer::m_sAlienBornPath;
 int AlienPanzer::m_siCodeOwnerOfBullet;
 int AlienPanzer::m_siQuantitySimpleAliensInGame;
+int AlienPanzer::m_siNumberOfTheAlien = 0;
+int AlienPanzer::m_siWidthOfMainImage;
+int AlienPanzer::m_siHeightOfMainImage;
+//================================================================================================================
+void AlienPanzer::SetDimensionsOfMainImage(const int &iWidth, const int iHeight)
+{
+   m_siWidthOfMainImage = iWidth;
+   m_siHeightOfMainImage = iHeight;
+}
+//================================================================================================================
+void AlienPanzer::ResetAliensInGame(const int &iQuantityAliensInGame)
+{
+    m_siNumberOfTheAlien = iQuantityAliensInGame;
+}
 //================================================================================================================
 void AlienPanzer::SetQuantitySimpleAliens(const int &iQuantitySimpleAliens)
 {
     m_siQuantitySimpleAliensInGame = iQuantitySimpleAliens;
+}
+//================================================================================================================
+void AlienPanzer::DecrementQuantityAliens()
+{
+    m_siQuantitySimpleAliensInGame--;
 }
 //================================================================================================================
 int AlienPanzer::GetQuantitySimpleAliens()
@@ -28,81 +44,70 @@ void AlienPanzer::SetCodeOwnerOfBullets(const int &iCodeOwner)
     m_siCodeOwnerOfBullet = iCodeOwner;
 }
 //================================================================================================================
-void AlienPanzer::SetRotatedSimpleAlienPathes()
-{
-    QMatrix matrix;
-    matrix.rotate(180);
-    m_sAlienPainterPathUp.m_AlienPanzerPainterPath = matrix.map(m_sAlienPainterPathUp.m_AlienPanzerPainterPath);
-    matrix.reset();
-    matrix.rotate(90);
-    m_sAlienPainterPathRight.m_AlienPanzerPainterPath = matrix.map(m_sAlienPainterPathUp.m_AlienPanzerPainterPath);
-    matrix.rotate(90);
-    m_sAlienPainterPathDown.m_AlienPanzerPainterPath = matrix.map(m_sAlienPainterPathUp.m_AlienPanzerPainterPath);
-    matrix.rotate(90);
-    m_sAlienPainterPathLeft.m_AlienPanzerPainterPath = matrix.map(m_sAlienPainterPathUp.m_AlienPanzerPainterPath);
-}
-//================================================================================================================
 AlienPanzer::AlienPanzer(const int &iColumn, const int &iRow) : DynamicGameThings(iColumn, iRow, 5)
 {
     m_eOrientation = Down;
-    m_iLiveHits = 3;
+    SetLiveHits(3);
     m_bIsMarkedToDelete = false;
     m_iShowCostTime = 20;
     m_iShowBorningTime = 2000;
     m_bIsDead = false;
     m_bIsBorning = false;
+    m_bIsFrozen = false;
     m_iCost = 100;
+    QString qmlObjectName = "alien_"+QString::number(m_siNumberOfTheAlien);
+    m_siNumberOfTheAlien++;
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
 }
 //================================================================================================================
 AlienPanzer::~AlienPanzer()
 {
-    m_siQuantitySimpleAliensInGame--;
 }
 //================================================================================================================
-void AlienPanzer::Draw(QPainter *pPainter)
+QString AlienPanzer::GetStringImage() const
 {
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*40 + m_iXdiplace + 20, m_iRow*40 + m_iYdiplace + 20);
-    pPainter->setBrush(Qt::NoBrush);
-    QPen thePen;
-    thePen.setWidth(1);
-    pPainter->setPen(thePen);
+    QString qstrToReturn;
+    static QString qstrArrayImages[7];
+    qstrArrayImages[0] = "Images/alien_panzer_nord.png";
+    qstrArrayImages[1] = "Images/alien_panzer_east.png";
+    qstrArrayImages[2] = "Images/alien_panzer_south.png";
+    qstrArrayImages[3] = "Images/alien_panzer_west.png";
+    qstrArrayImages[4] = "Images/pulse_1.png";
+    qstrArrayImages[5] = "Images/pulse_2.png";
+    qstrArrayImages[6] = "Images/plus_100.png";
     if (!m_bIsDead && !m_bIsBorning) {
         switch (m_eOrientation) {
-            case Left:
-                pPainter->drawPath(m_sAlienPainterPathLeft.
-                                   m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-                break;
-            case Right:
-                pPainter->drawPath(m_sAlienPainterPathRight.
-                                   m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-                break;
             case Up:
-                pPainter->drawPath(m_sAlienPainterPathUp.
-                                   m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-                break;
+                qstrToReturn = qstrArrayImages[0];
+            break;
+            case Right:
+                qstrToReturn = qstrArrayImages[1];
+            break;
             case Down:
-                pPainter->drawPath(m_sAlienPainterPathDown.
-                                   m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-                break;
+                qstrToReturn = qstrArrayImages[2];
+            break;
+            case Left:
+                qstrToReturn = qstrArrayImages[3];
+            break;
             default:
-                break;
+            break;
         }
-    }
-    else if (m_bIsDead){
-        pPainter->drawText(m_iColumn*GetCellSide() + m_iXdiplace+2,
-                           m_iRow*GetCellSide() + m_iYdiplace+25, "+" + QString::number(m_iCost));
     }
     else if (m_bIsBorning) {
         static int iPulseCounter = 0;
         if ((iPulseCounter/7) % 2 == 0) {
-            pPainter->drawPath(m_sAlienBornPath.m_PulseFirstPainterPath.translated(qpointTranslatedPosition));
+            qstrToReturn = qstrArrayImages[4];
         }
         else {
-            pPainter->drawPath(m_sAlienBornPath.m_PulseSecondPainterPath.translated(qpointTranslatedPosition));
+            qstrToReturn = qstrArrayImages[5];
         }
         iPulseCounter++;
     }
+    else if (m_bIsDead) {
+        qstrToReturn = qstrArrayImages[6];
+    }
     else {}
+    return qstrToReturn;
 }
 //================================================================================================================
 bool AlienPanzer::CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings)
@@ -199,63 +204,18 @@ void AlienPanzer::BulletHitHandler(Bullet * pBullet)
     if (m_bIsBorning) {
         return;
     }
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*40 + m_iXdiplace + 20, m_iRow*40 + m_iYdiplace + 20);
-    QPainterPath thePainterPath;
-    switch (m_eOrientation) {
-        case Left:
-            thePainterPath = m_sAlienPainterPathLeft.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Right:
-            thePainterPath = m_sAlienPainterPathRight.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Up:
-            thePainterPath = m_sAlienPainterPathUp.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Down:
-            thePainterPath = m_sAlienPainterPathDown.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        default:
-            break;
-    }
-    QRectF theAlienRect = thePainterPath.boundingRect();
-    int x_begin = theAlienRect.left();
-    int x_end = theAlienRect.left()+theAlienRect.width();
-    int y_begin = theAlienRect.top();
-    int y_end = theAlienRect.top() + theAlienRect.height();
-    int x_bullet_begin = pBullet->GetColumn()*GetCellSide() + pBullet->GetXdiplace() + GetCellSide()/2;
-    int x_bullet_end = x_bullet_begin + 5;
-    int y_bullet_begin = pBullet->GetRow()*GetCellSide() + pBullet->GetYdiplace() + GetCellSide()/2;
-    int y_bullet_end = y_bullet_begin +5;
-    bool bIsHitting = false;
-    switch (pBullet->GetMoveOrientation()) {
-    case Left:
-    case Right:
-        if ((y_bullet_begin >= y_begin && y_bullet_begin <= y_end) ||
-            (y_bullet_end >= y_begin && y_bullet_end <= y_end)) {
-            bIsHitting = true;
-        }
-        break;
-    case Up:
-    case Down:
-        if ((x_bullet_begin >= x_begin && x_bullet_begin <= x_end) ||
-            (x_bullet_end >= x_begin && x_bullet_end <= x_end)) {
-            bIsHitting = true;
-        }
-        break;
-    default:
-        break;
-    }
-
-    if (this != pBullet->GetPointerParent() && bIsHitting) {
+    bool bIsGeometrycallyHitting = IsGeometrycalHitting(pBullet);
+    if (this != pBullet->GetPointerParent() && bIsGeometrycallyHitting) {
         pBullet->MarkToDelete();
     }
-    if (m_siCodeOwnerOfBullet != pBullet->GetCodeOwner() && bIsHitting) {
+    if (m_siCodeOwnerOfBullet != pBullet->GetCodeOwner() && bIsGeometrycallyHitting) {
 
-        m_iLiveHits--;
+        DecrementLiveHits();
         pBullet->MarkToDelete();
-        if (m_iLiveHits < 0) {
+        if (GetLiveHits() < 0) {
             SetStatistic();
             m_bIsDead = true;
+            QSound::play(":/audio/explosion.wav");
         }
     }
 }
@@ -326,5 +286,35 @@ int AlienPanzer::GetCost() const
 void AlienPanzer::SetTypicalVelosity()
 {
     SetVelosity(GetTypicalVelosity());
+}
+//================================================================================================================
+int AlienPanzer::GetWidth() const
+{
+    if (m_eOrientation == Up || m_eOrientation == Down) {
+        return m_siWidthOfMainImage;
+    }
+    else {
+        return m_siHeightOfMainImage;
+    }
+}
+//================================================================================================================
+int AlienPanzer::GetHeight() const
+{
+    if (m_eOrientation == Up || m_eOrientation == Down) {
+        return m_siHeightOfMainImage;
+    }
+    else {
+        return m_siWidthOfMainImage;
+    }
+}
+//================================================================================================================
+void AlienPanzer::SetFrozen(const bool &bFrozen)
+{
+    m_bIsFrozen = bFrozen;
+}
+//================================================================================================================
+bool AlienPanzer::IsFrozen() const
+{
+    return m_bIsFrozen;
 }
 //================================================================================================================

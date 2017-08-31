@@ -2,52 +2,42 @@
 #include "Labyrinth.h"
 #include "GameStatistic.h"
 //=================================================================================================================
-#include <QPainter>
-//=================================================================================================================
-KillThemAllPrizePath KillThemAllPrize::m_sKillThemAllPrizePath;
-//=================================================================================================================
-void KillThemAllPrize::SetKillThemAllPrizePath()
-{
-    QMatrix matrix;
-    matrix.rotate(180);
-    m_sKillThemAllPrizePath.m_KillThemAllPrizePainterPath =
-            matrix.map(m_sKillThemAllPrizePath.m_KillThemAllPrizePainterPath);
-}
+#include <QDeclarativeView>
+#include <QGraphicsObject>
 //=================================================================================================================
 KillThemAllPrize::KillThemAllPrize(const int &iColumn, const int &iRow, Labyrinth *pLabyrinth) : Prize(iColumn, iRow)
 {
     m_pLabyrinth = pLabyrinth;
+    QString qmlObjectName = "prize";
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
 }
 //=================================================================================================================
 KillThemAllPrize::~KillThemAllPrize()
 {
-
 }
 //=================================================================================================================
-void KillThemAllPrize::Draw(QPainter *pPainter)
+QString KillThemAllPrize::GetStringImage() const
 {
-    static int iBlinkCounter = 0;
-    QPen pen;
-    pen.setWidth(2);
-    pen.setColor(Qt::black);
-    pPainter->setPen(pen);
-    pPainter->setBrush(Qt::NoBrush);
-    if (IsEffect()) {
-        pPainter->setBrush(Qt::NoBrush);
+    QString qstrToReturn;
+    static QString qstrArrayImages[3];
+    qstrArrayImages[0] = "Images/kill_them_all.png";
+    qstrArrayImages[1] = "Images/kill_them_all_empty.png";
+    qstrArrayImages[2] = "Images/plus_500.png";
 
-        pPainter->drawText(m_iColumn*GetCellSide() + m_iXdiplace+2,
-                           m_iRow*GetCellSide() + m_iYdiplace+25, "+" + QString::number(GetPrizeCost()));
+    static int iBlinkCounter = 0;
+    if (IsEffect()) {
+        qstrToReturn = qstrArrayImages[2];
     }
     else {
-        QPoint qpointTranslatedPosition = QPoint(m_iColumn*GetCellSide() + m_iXdiplace + GetCellSide()/2,
-                                                 m_iRow*GetCellSide() + m_iYdiplace + GetCellSide()/2);
-
-
         if ((iBlinkCounter/10) % 2 == 0) {
-            pPainter->drawPath(m_sKillThemAllPrizePath.m_KillThemAllPrizePainterPath.translated(qpointTranslatedPosition));
+            qstrToReturn = qstrArrayImages[1];
+        }
+        else {
+            qstrToReturn = qstrArrayImages[0];
         }
     }
     iBlinkCounter++;
+    return qstrToReturn;
 }
 //=================================================================================================================
 void KillThemAllPrize::KillThemAll()

@@ -2,32 +2,24 @@
 #include "Labyrinth.h"
 #include "Bullet.h"
 //================================================================================================================
-#include <QPainter>
-//================================================================================================================
-FlagPrizePath FlagPrize::m_sFlagPrizePath;
-//================================================================================================================
-void FlagPrize::SetFlagPrizePath()
-{
-    QMatrix matrix;
-    matrix.rotate(180);
-    m_sFlagPrizePath.m_FlagPrizePath = matrix.map(m_sFlagPrizePath.m_FlagPrizePath);
-}
+#include <QDeclarativeView>
+#include <QGraphicsObject>
+#include <QSound>
 //================================================================================================================
 FlagPrize::FlagPrize(const int &iColumn, const int &iRow, Labyrinth * pLabyrinth) : Prize(iColumn, iRow)
 {
     m_pLabyrinth = pLabyrinth;
+    QString qmlObjectName = "our_flag";
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
 }
 //================================================================================================================
-void FlagPrize::Draw(QPainter *pPainter)
+FlagPrize::~FlagPrize()
 {
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*GetCellSide() + m_iXdiplace + GetCellSide()/2,
-                                             m_iRow*GetCellSide() + m_iYdiplace + GetCellSide()/2);
-    QPen pen;
-    pen.setColor(Qt::black);
-    pen.setWidth(2);
-    pPainter->setPen(pen);
-    pPainter->setBrush(Qt::NoBrush);
-    pPainter->drawPath(m_sFlagPrizePath.m_FlagPrizePath.translated(qpointTranslatedPosition));
+}
+//================================================================================================================
+QString FlagPrize::GetStringImage() const
+{
+    return QString("Images/flag_prize.png");
 }
 //================================================================================================================
 bool FlagPrize::CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings)
@@ -38,6 +30,7 @@ bool FlagPrize::CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings)
 //================================================================================================================
 void FlagPrize::BulletHitHandler(Bullet * pBullet)
 {
+    QSound::play(":/audio/explosion.wav");
     pBullet->MarkToDelete();
     MarkToDelete();
     GameOver();

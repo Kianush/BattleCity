@@ -1,9 +1,11 @@
 #include "OurPanzer.h"
 #include "Bullet.h"
 //=================================================================================================================
-#include <QPainter>
 #include <QDebug>
 #include <math.h>
+#include <QDeclarativeView>
+#include <QGraphicsObject>
+#include <QSound>
 //=================================================================================================================
 int OurPanzer::m_siLiveCount;
 //=================================================================================================================
@@ -24,6 +26,8 @@ OurPanzer::OurPanzer(const int &iColumn, const int &iRow) :
     m_iVelosity = 0;
     m_bStoping = false;
     m_bIsShooting = false;
+    QString qmlObjectName = "our_panzer";
+    m_pQmlImage = m_psMainDeclarativeView->rootObject()->findChild<QObject*>(qmlObjectName);
 }
 //=================================================================================================================
 void OurPanzer::SetOrientation(const DynamicGameThings::Orientation &eOrientation)
@@ -46,6 +50,7 @@ void OurPanzer::SetOrientation(const DynamicGameThings::Orientation &eOrientatio
                 break;
             }
         }
+        QSound::play(":/audio/rotate.wav");
     }
 }
 //=================================================================================================================
@@ -54,30 +59,31 @@ OurPanzer::~OurPanzer()
     m_siLiveCount--;
 }
 //=================================================================================================================
-void OurPanzer::Draw(QPainter *pPainter)
+QString OurPanzer::GetStringImage() const
 {
-    QPen thePen;
-    thePen.setWidth(2);
-    thePen.setColor(Qt::darkGreen);
-    pPainter->setPen(thePen);
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*40 + m_iXdiplace + 20, m_iRow*40 + m_iYdiplace + 20);
-    pPainter->setBrush(Qt::NoBrush);
+    QString qstrToReturn;
+    static QString qstrArrayImages[4];
+    qstrArrayImages[0] = "Images/our_panzer_nord.png";
+    qstrArrayImages[1] = "Images/our_panzer_east.png";
+    qstrArrayImages[2] = "Images/our_panzer_south.png";
+    qstrArrayImages[3] = "Images/our_panzer_west.png";
     switch (m_eOrientation) {
-        case Left:
-            pPainter->drawPath(m_sAlienPainterPathLeft.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-            break;
-        case Right:
-            pPainter->drawPath(m_sAlienPainterPathRight.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-            break;
         case Up:
-            pPainter->drawPath(m_sAlienPainterPathUp.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-            break;
+            qstrToReturn = qstrArrayImages[0];
+        break;
+        case Right:
+            qstrToReturn = qstrArrayImages[1];
+        break;
         case Down:
-            pPainter->drawPath(m_sAlienPainterPathDown.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition));
-            break;
+            qstrToReturn = qstrArrayImages[2];
+        break;
+        case Left:
+            qstrToReturn = qstrArrayImages[3];
+        break;
         default:
-            break;
+        break;
     }
+    return qstrToReturn;
 }
 //=================================================================================================================
 int OurPanzer::GetMyCodeOfBullet() const
@@ -93,65 +99,22 @@ Bullet * OurPanzer::Shoot()
     pToReturn->SetCodeOwner(GetMyCodeOfBullet());
     pToReturn->SetParent(this);
     m_bIsShooting = true;
+    QSound::play(":/audio/shot.wav");
     return pToReturn;
 }
 //=================================================================================================================
 void OurPanzer::BulletHitHandler(Bullet * pBullet)
 {
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*40 + m_iXdiplace + 20, m_iRow*40 + m_iYdiplace + 20);
-    QPainterPath thePainterPath;
-    switch (m_eOrientation) {
-        case Left:
-            thePainterPath = m_sAlienPainterPathLeft.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Right:
-            thePainterPath = m_sAlienPainterPathRight.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Up:
-            thePainterPath = m_sAlienPainterPathUp.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        case Down:
-            thePainterPath = m_sAlienPainterPathDown.m_AlienPanzerPainterPath.translated(qpointTranslatedPosition);
-            break;
-        default:
-            break;
-    }
-    QRectF theRect = thePainterPath.boundingRect();
-    int x_begin = theRect.left();
-    int x_end = theRect.left()+theRect.width();
-    int y_begin = theRect.top();
-    int y_end = theRect.top() + theRect.height();
-    int x_bullet_begin = pBullet->GetColumn()*GetCellSide() + pBullet->GetXdiplace() + GetCellSide()/2;
-    int x_bullet_end = x_bullet_begin + 5;
-    int y_bullet_begin = pBullet->GetRow()*GetCellSide() + pBullet->GetYdiplace() + GetCellSide()/2;
-    int y_bullet_end = y_bullet_begin +5;
     bool bIsHitting = false;
-    switch (pBullet->GetMoveOrientation()) {
-    case Left:
-    case Right:
-        if ((y_bullet_begin >= y_begin && y_bullet_begin <= y_end) ||
-            (y_bullet_end >= y_begin && y_bullet_end <= y_end)) {
-            bIsHitting = true;
-        }
-        break;
-    case Up:
-    case Down:
-        if ((x_bullet_begin >= x_begin && x_bullet_begin <= x_end) ||
-            (x_bullet_end >= x_begin && x_bullet_end <= x_end)) {
-            bIsHitting = true;
-        }
-        break;
-    default:
-        break;
-    }
-
+    bIsHitting = IsGeometrycalHitting(pBullet);
     if (this != pBullet->GetPointerParent() && bIsHitting) {
         pBullet->MarkToDelete();
     }
     if (GetMyCodeOfBullet() != pBullet->GetCodeOwner() && bIsHitting) {
-        m_iLiveHits--;
+        DecrementLiveHits();
         pBullet->MarkToDelete();
-        if (m_iLiveHits < 0) {
+        if (GetLiveHits() < 0) {
+            QSound::play(":/audio/explosion.wav");
             MarkToDelete();
         }
     }
@@ -199,26 +162,53 @@ void OurPanzer::UnsetShootingSign()
 //=================================================================================================================
 QRectF OurPanzer::GetBoundingRect()
 {
-    QPoint qpointTranslatedPosition = QPoint(m_iColumn*GetCellSide() + m_iXdiplace + GetCellSide()/2,
-                                             m_iRow*GetCellSide() + m_iYdiplace + GetCellSide()/2);
     QRectF theRect;
     switch (m_eOrientation) {
+        case Right:
         case Left:
-            theRect = m_sAlienPainterPathLeft.m_AlienPanzerPainterPath.boundingRect();
+            theRect = QRectF(GetColumn()*GetCellSide() + GetXdiplace(),
+                             GetRow()*GetCellSide() + GetYdiplace(),
+                             GetWidth(), GetHeight());
+        break;
+        case Up:
+        case Down:
+        theRect = QRectF(GetColumn()*GetCellSide() + GetXdiplace(),
+                         GetRow()*GetCellSide() + GetYdiplace(),
+                         GetHeight(), GetWidth());
+        break;
+        default:
+        break;
+    }
+    return theRect;
+}
+//=================================================================================================================
+bool OurPanzer::CanMoveIntoCurrentCell() const
+{
+    bool bToReturn = false;
+    switch (m_eOrientation) {
+        case Left:
+            if (m_iXdiplace >= 0 && (m_iXdiplace - m_iVelosity) >= 0) {
+                bToReturn = true;
+            }
             break;
         case Right:
-            theRect = m_sAlienPainterPathRight.m_AlienPanzerPainterPath.boundingRect();
+            if (m_iXdiplace <= 0 && (m_iXdiplace + m_iVelosity) <= 0) {
+                bToReturn = true;
+            }
             break;
         case Up:
-            theRect = m_sAlienPainterPathUp.m_AlienPanzerPainterPath.boundingRect();
+            if (m_iYdiplace >= 0 && (m_iYdiplace - m_iVelosity) >= 0) {
+                bToReturn = true;
+            }
             break;
         case Down:
-            theRect = m_sAlienPainterPathDown.m_AlienPanzerPainterPath.boundingRect();
+            if (m_iYdiplace <= 0 && (m_iYdiplace + m_iVelosity) <= 0) {
+                bToReturn = true;
+            }
             break;
         default:
             break;
     }
-    theRect = theRect.translated(qpointTranslatedPosition);
-    return theRect;
+    return bToReturn;
 }
 //=================================================================================================================

@@ -1,22 +1,23 @@
 #ifndef EXTERNALWALL_H
 #define EXTERNALWALL_H
 //===============================================================================================================
-#include "StaticGameThings.h"
+#include "GameThings.h"
 //===============================================================================================================
-class QPainter;
 class Bullet;
 class DynamicGameThings;
+class QObject;
 //===============================================================================================================
-class ExternalWall : public StaticGameThings
+class ExternalWall : public GameThings
 {
 public:
     ExternalWall(const int &iColumn, const int &iRow);
     virtual ~ExternalWall();
-    virtual void Draw(QPainter *pPainter);
+    //virtual void Draw();
     virtual void BulletHitHandler(Bullet * pBullet);
-    virtual void PlaySoundAtBornMoment() {}
-    virtual void PlaySoundAtDeadMoment() {}
     virtual bool CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings);
+    virtual QString GetStringImage() const;
+//private:
+//    QObject * m_pQmlImage;
 };
 //===============================================================================================================
 #endif // EXTERNALWALL_H

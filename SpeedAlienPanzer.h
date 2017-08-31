@@ -7,6 +7,8 @@ class SpeedAlienPanzer : public AlienPanzer
 {
 public:
     SpeedAlienPanzer(const int &iColumn, const int &iRow);
+    virtual QString GetStringImage() const;
+    //virtual void Draw();
     ~SpeedAlienPanzer();
 protected:
     virtual void SetStatistic();
