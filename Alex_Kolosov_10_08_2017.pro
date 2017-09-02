@@ -33,7 +33,11 @@ SOURCES += main.cpp\
     GameStatistic.cpp \
     SpeedAlienPanzer.cpp \
     MainDeclarativeView.cpp \
-    FrozePrize.cpp
+    FrozePrize.cpp \
+    AudioThread.cpp \
+    AudioDelegate.cpp \
+    BulletExplosion.cpp \
+    BigExplosion.cpp
 
 HEADERS  += mainwindow.h \
     Labyrinth.h \
@@ -54,7 +58,12 @@ HEADERS  += mainwindow.h \
     SpeedAlienPanzer.h \
     FlagPrize.h \
     MainDeclarativeView.h \
-    FrozePrize.h
+    FrozePrize.h \
+    AudioThread.h \
+    AudioEvents.h \
+    AudioDelegate.h \
+    BulletExplosion.h \
+    BigExplosion.h
 
 FORMS    += mainwindow.ui
 
