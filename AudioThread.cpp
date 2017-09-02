@@ -7,26 +7,38 @@
 //=================================================================================================================
 GameAudioPlayer::GameAudioPlayer(QObject * pParent) : QObject(pParent)
 {
-    m_pMoveSound = new QSound(":/audio/our_move.wav", this);
-    m_pStopSound = new QSound(":/audio/our_stop.wav", this);
-    m_pMoveSound->setLoops(QSound::Infinite);
-    m_pStopSound->setLoops(QSound::Infinite);
+    //m_pMoveSound = new QSound(":/audio/our_move.wav", this);
+    //m_pStopSound = new QSound(":/audio/our_stop.wav", this);
+    //m_pMoveSound->setLoops(QSound::Infinite);
+    //m_pStopSound->setLoops(QSound::Infinite);
     const int SIZE_PULL_SOUNDS = 5;
     for (int sound_count = 0; sound_count < SIZE_PULL_SOUNDS; ++sound_count) {
         QSound * pSound = new QSound(":/audio/shot.wav", this);
         m_qvecShotSound.push_back(pSound);
+
         pSound = new QSound(":/audio/rotate.wav", this);
         m_qvecRotateSound.push_back(pSound);
-    }
 
-    m_pExplosionSound = new QSound(":/audio/explosion.wav", this);
+        pSound = new QSound(":/audio/our_move.wav", this);
+        m_qvecMoveSound.push_back(pSound);
+
+        pSound = new QSound(":/audio/explosion.wav", this);
+        m_qvecExplosionSound.push_back(pSound);
+
+        pSound = new QSound(":/audio/our_stop.wav", this);
+        m_qvecStopSound.push_back(pSound);
+    }
+    m_qvecStopSound[0]->setLoops(QSound::Infinite);
+    m_qvecStopSound[0]->play();
+    //m_pExplosionSound = new QSound(":/audio/explosion.wav", this);
     m_pGetPrizeSound = new QSound(":/audio/get_prize.wav", this);
+    m_bIsMoving = false;
 }
 //=================================================================================================================
 GameAudioPlayer::~GameAudioPlayer()
 {
-    delete m_pMoveSound;
-    delete m_pStopSound;
+    //delete m_pMoveSound;
+    //delete m_pStopSound;
     QSound * pSound;
     int sound_count;
     for (sound_count = 0; sound_count < m_qvecShotSound.size(); ++sound_count) {
@@ -39,9 +51,25 @@ GameAudioPlayer::~GameAudioPlayer()
         delete pSound;
         pSound = nullptr;
     }
+    for (sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+        pSound = m_qvecMoveSound[sound_count];
+        delete pSound;
+        pSound = nullptr;
+    }
+    for (sound_count = 0; sound_count < m_qvecStopSound.size(); ++sound_count) {
+        pSound = m_qvecStopSound[sound_count];
+        delete pSound;
+        pSound = nullptr;
+    }
+    for (sound_count = 0; sound_count < m_qvecExplosionSound.size(); ++sound_count) {
+        pSound = m_qvecExplosionSound[sound_count];
+        delete pSound;
+        pSound = nullptr;
+    }
     m_qvecShotSound.clear();
     m_qvecRotateSound.clear();
-    delete m_pExplosionSound;
+    m_qvecMoveSound.clear();
+    m_qvecShotSound.clear();
     delete m_pGetPrizeSound;
 }
 //=================================================================================================================
@@ -49,16 +77,44 @@ void GameAudioPlayer::customEvent(QEvent *pCustomEvent)
 {
     int iCustomEventType = pCustomEvent->type();
     if (iCustomEventType == UserMoveAudioEvent::UserMoveAudioType) {
-        m_pStopSound->stop();
-        m_pMoveSound->play();
+        if (m_bIsMoving != true) {
+            m_bIsMoving = true;
+            static int iCallMoveCount = 0;
+            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
+            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->play();
+
+            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+                if ((iCallMoveCount%m_qvecMoveSound.size()) != sound_count) {
+                    m_qvecMoveSound[sound_count]->setLoops(0);
+                }
+                m_qvecStopSound[sound_count]->stop();
+            }
+            iCallMoveCount++;
+        }
     }
     if (iCustomEventType == UserStopAudioEvent::UserStopAudioType) {
-        m_pStopSound->play();
-        m_pMoveSound->stop();
+        if (m_bIsMoving != false) {
+            m_bIsMoving = false;
+            static int iCallStopCount = 0;
+            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
+            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->play();
+
+            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+                if ((iCallStopCount%m_qvecStopSound.size()) != sound_count) {
+                    m_qvecStopSound[sound_count]->setLoops(0);
+                }
+                m_qvecMoveSound[sound_count]->stop();
+            }
+            iCallStopCount++;
+        }
     }
     if (iCustomEventType == GameStopAudioEvent::GameStopAudioType) {
-        m_pStopSound->stop();
-        m_pMoveSound->stop();
+        for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+            m_qvecMoveSound[sound_count]->stop();
+        }
+        for (int sound_count = 0; sound_count < m_qvecStopSound.size(); ++sound_count) {
+            m_qvecStopSound[sound_count]->stop();
+        }
     }
     if (iCustomEventType == GetPrizeAudioEvent::GetPrizeAudioType) {
         //QSound::play(":/audio/get_prize.wav");
@@ -75,8 +131,9 @@ void GameAudioPlayer::customEvent(QEvent *pCustomEvent)
         iCallRotateCount++;
     }
     if (iCustomEventType == ExplosionAudioEvent::ExplosionAudioType) {
-        //QSound::play(":/audio/explosion.wav");
-        m_pExplosionSound->play();
+        static int iCallExplosionCount = 0;
+        m_qvecExplosionSound[iCallExplosionCount % m_qvecExplosionSound.size()]->play();
+        iCallExplosionCount++;
     }
     QObject::customEvent(pCustomEvent);
 }

@@ -15,13 +15,14 @@ public:
     ~GameAudioPlayer();
 protected:
     virtual void customEvent(QEvent * pCustomEvent);
-    QSound * m_pMoveSound;
-    QSound * m_pStopSound;
+    QVector<QSound*> m_qvecMoveSound;
+    QVector<QSound*> m_qvecStopSound;
     QVector<QSound*> m_qvecShotSound;
-    QSound * m_pExplosionSound;
+    QVector<QSound*> m_qvecExplosionSound;
     QVector<QSound*> m_qvecRotateSound;
-    //QSound * m_pRotateSound;
     QSound * m_pGetPrizeSound;
+private:
+    bool m_bIsMoving;
 };
 //=================================================================================================================
 class GameAudioThread : public QThread
