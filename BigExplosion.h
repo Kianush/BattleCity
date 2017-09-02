@@ -1,0 +1,4 @@
+#ifndef BIGEXPLOSION_H
+#define BIGEXPLOSION_H
+
+#endif // BIGEXPLOSION_H

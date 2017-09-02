@@ -1,0 +1,4 @@
+#ifndef AUDIOEVENTS_H
+#define AUDIOEVENTS_H
+
+#endif // AUDIOEVENTS_H
