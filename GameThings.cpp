@@ -1,6 +1,9 @@
 #include "GameThings.h"
 #include "Bullet.h"
+#include "DynamicGameThings.h"
 #include "GameStatistic.h"
+#include "AudioDelegate.h"
+#include "BigExplosion.h"
 //=================================================================================================================
 #include <QtGlobal>
 #include <QGraphicsObject>
@@ -9,6 +12,12 @@
 int GameThings::m_siCellSizeOfSide;
 GameStatistic * GameThings::m_psGameStatistic;
 QDeclarativeView * GameThings::m_psMainDeclarativeView;
+AudioDelegate * GameThings::m_psAudioDelegate = nullptr;
+//=================================================================================================================
+void GameThings::SetAudioDelegate(AudioDelegate * pAudioDelegate)
+{
+    m_psAudioDelegate = pAudioDelegate;
+}
 //=================================================================================================================
 void GameThings::SetPointerGameStatistic(GameStatistic * psGameStatistic)
 {
@@ -40,6 +49,7 @@ GameThings::GameThings(const int &iColumn, const int &iRow)
     m_iColumn = iColumn; m_iRow = iRow;
     m_iXdiplace = 0; m_iYdiplace = 0;
     m_iLiveHits = 0;
+    m_bIsExplosion = false;
 }
 //=================================================================================================================
 GameThings::~GameThings()
@@ -139,5 +149,47 @@ int GameThings::GetYdiplace() const
 void GameThings::SetYdiplace(const int &iYdiplace)
 {
     m_iYdiplace = iYdiplace;
+}
+//=================================================================================================================
+void GameThings::BulletHitHandler(Bullet * pBullet)
+{
+    switch (pBullet->GetMoveOrientation()) {
+        case DynamicGameThings::Up:
+            pBullet->SetCentrExplosion(m_iColumn*GetCellSide() + GetCellSide()/2,
+                                       (m_iRow + 1)*GetCellSide());
+        break;
+        case DynamicGameThings::Down:
+            pBullet->SetCentrExplosion(m_iColumn*GetCellSide() + GetCellSide()/2,
+                                       m_iRow*GetCellSide());
+        break;
+        case DynamicGameThings::Left:
+            pBullet->SetCentrExplosion((m_iColumn+1)*GetCellSide(),
+                                       m_iRow*GetCellSide() + GetCellSide()/2);
+        break;
+        case DynamicGameThings::Right:
+            pBullet->SetCentrExplosion(m_iColumn*GetCellSide(),
+                                       m_iRow*GetCellSide() + GetCellSide()/2);
+        break;
+        default:
+        break;
+    }
+}
+//=================================================================================================================
+bool GameThings::IsExplosion()
+{
+    return m_bIsExplosion;
+}
+//=================================================================================================================
+void GameThings::SetExplosion(const bool bExplosion)
+{
+    m_bIsExplosion = bExplosion;
+}
+//=================================================================================================================
+BigExplosion * GameThings::CreateBigExplosion() const
+{
+    BigExplosion * pBigExplosion = new BigExplosion(GetColumn(), GetRow());
+    pBigExplosion->SetXdiplace(GetXdiplace());
+    pBigExplosion->SetYdiplace(GetYdiplace());
+    return pBigExplosion;
 }
 //=================================================================================================================

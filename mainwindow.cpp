@@ -3,6 +3,8 @@
 #include "Labyrinth.h"
 #include "GameStatistic.h"
 #include "MainDeclarativeView.h"
+#include "AudioDelegate.h"
+#include "AudioThread.h"
 //================================================================================================================
 #include <QKeyEvent>
 #include <QString>
@@ -12,6 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     m_pqdvUi = new MainDeclarativeView;
+    m_pAudioDelegate = new AudioDelegate(this);
+    m_pGameAudioThread = new GameAudioThread(m_pAudioDelegate, this);
+    m_pGameAudioThread->start();
     m_pqdvUi->setSource(QUrl("qrc:/qml/main.qml"));
     setCentralWidget(m_pqdvUi);
     m_pqdvUi->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -35,6 +40,13 @@ MainWindow::~MainWindow()
     }
     if (nullptr != m_pqdvUi) {
         delete m_pqdvUi;
+    }
+    if (nullptr != m_pAudioDelegate) {
+        delete m_pAudioDelegate;
+    }
+    if (nullptr != m_pGameAudioThread) {
+        m_pGameAudioThread->exit();
+        delete m_pGameAudioThread;
     }
 }
 //================================================================================================================
@@ -62,7 +74,7 @@ void MainWindow::slotGameOver()
 //================================================================================================================
 void MainWindow::slotNewGame()
 {
-    ui->m_pqpbNewGame->setVisible(false);
+    //ui->m_pqpbNewGame->setVisible(false);
     m_pGameStatistic->Reset();
     SetGame();
 }
@@ -75,7 +87,7 @@ void MainWindow::SetGame()
     const int HEIGHT_GAME_MAP = CELL_SIDE * QUANTITY_ROWS;
     Labyrinth::SetDimension(QUANTITY_COLUMNS, QUANTITY_ROWS);
     m_bGameStarted = true;
-    m_pLabyrinth = new Labyrinth(CELL_SIDE, this);
+    m_pLabyrinth = new Labyrinth(CELL_SIDE, m_pAudioDelegate, this);
     m_pLabyrinth->setGeometry(0,0,WIDTH_GAME_MAP + 3*CELL_SIDE, HEIGHT_GAME_MAP);
     m_pLabyrinth->setVisible(false);
     connect(m_pLabyrinth, SIGNAL(sigGameOver()), this, SLOT(slotGameOver()));

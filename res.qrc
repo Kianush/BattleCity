@@ -36,5 +36,27 @@
         <file>audio/our_stop.wav</file>
         <file>audio/rotate.wav</file>
         <file>qml/Images/froze.png</file>
+        <file>qml/Images/bullet_explosion_1.png</file>
+        <file>qml/Images/bullet_explosion_2.png</file>
+        <file>qml/Images/bullet_explosion_3.png</file>
+        <file>qml/Images/bullet_explosion_4.png</file>
+        <file>qml/Images/bullet_explosion_5.png</file>
+        <file>qml/Images/bullet_explosion_6.png</file>
+        <file>qml/Images/bullet_explosion_7.png</file>
+        <file>qml/Images/bullet_explosion_8.png</file>
+        <file>qml/Images/bullet_explosion_9.png</file>
+        <file>qml/Images/bullet_explosion_10.png</file>
+        <file>qml/Images/bullet_explosion_11.png</file>
+        <file>qml/Images/big_explosion_1.png</file>
+        <file>qml/Images/big_explosion_2.png</file>
+        <file>qml/Images/big_explosion_3.png</file>
+        <file>qml/Images/big_explosion_4.png</file>
+        <file>qml/Images/big_explosion_5.png</file>
+        <file>qml/Images/big_explosion_6.png</file>
+        <file>qml/Images/big_explosion_7.png</file>
+        <file>qml/Images/big_explosion_8.png</file>
+        <file>qml/Images/big_explosion_9.png</file>
+        <file>qml/Images/big_explosion_10.png</file>
+        <file>qml/Images/big_explosion_11.png</file>
     </qresource>
 </RCC>

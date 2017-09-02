@@ -23,8 +23,7 @@ public:
     virtual void Move(bool &bCellChange) = 0;
     virtual int GetWidth() const = 0;
     virtual int GetHeight() const  = 0;
-    virtual void SetOrientation(const DynamicGameThings::Orientation &eOrientation);
-
+    virtual void SetOrientation(const Orientation &eOrientation);
     void SetVelosity(const int &iVelosity);
     int GetVelosity() const;
 protected:

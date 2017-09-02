@@ -1,10 +1,10 @@
 #include "FlagPrize.h"
 #include "Labyrinth.h"
 #include "Bullet.h"
+#include "AudioDelegate.h"
 //================================================================================================================
 #include <QDeclarativeView>
 #include <QGraphicsObject>
-#include <QSound>
 //================================================================================================================
 FlagPrize::FlagPrize(const int &iColumn, const int &iRow, Labyrinth * pLabyrinth) : Prize(iColumn, iRow)
 {
@@ -30,7 +30,8 @@ bool FlagPrize::CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings)
 //================================================================================================================
 void FlagPrize::BulletHitHandler(Bullet * pBullet)
 {
-    QSound::play(":/audio/explosion.wav");
+    SetExplosion();
+    m_psAudioDelegate->PlayExplosion();
     pBullet->MarkToDelete();
     MarkToDelete();
     GameOver();

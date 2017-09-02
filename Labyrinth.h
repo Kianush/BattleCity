@@ -14,13 +14,16 @@ class Bullet;
 class FlagPrize;
 class GameStatistic;
 class QDeclarativeView;
-class QSound;
+class BulletExplosion;
+class BigExplosion;
+class AudioDelegate;
 //=================================================================================================================
 class Labyrinth : public QWidget
 {
 Q_OBJECT
 public:
     Labyrinth(const int iSizeOfSideOfCell,
+              AudioDelegate * pAudioDelegate,
               QWidget * pParent = nullptr);
     virtual ~Labyrinth();
 
@@ -57,11 +60,14 @@ private:
     void AliensStepInGame(const int &iTime);
     void PrizesStepInGame(const int &iTime);
     void BulletsStepInGame();
+    void BulletsExplosionStepInGame();
+    void BigExplosionStepInGame();
     void CleanOursStepInGame();
     void CleanAliensStepInGame();
     void CleanPrizesStepInGame();
     void CleanBulletsStepInGame();
-
+    void CleanBulletsExplosionStepInGame();
+    void CleanBigExplosionStepInGame();
     static bool CellLessThan(const QPoint &p1, const QPoint &p2);
 private:
     static int m_siCellsInRowQuantity;
@@ -74,14 +80,17 @@ private:
     QList<AlienPanzer*> m_qlist_Aliens;
     QList<AlienPanzer*> m_qlist_ExternalAliens;
     QList<Bullet*> m_qlist_Bullets;
+    QList<BulletExplosion*> m_qlist_BulletExplosions;
+    QList<BigExplosion*> m_qlist_BigExplosions;
     int m_iGameTick;
     int m_iTimerId;
     bool m_bGameOver;
     bool m_bFrozeAliens;
     int m_iTimeFroze;
     GameStatistic * m_pGameStatistic;
-    QSound * m_pSound_Move;
-    QSound * m_pSound_Stop;
+    AudioDelegate * m_pAudioDelegate;
+//    QSound * m_pSound_Move;
+//    QSound * m_pSound_Stop;
 };
 //=================================================================================================================
 #endif // LABIRINTH_H

@@ -8,18 +8,21 @@
 #include "KillThemAllPrize.h"
 #include "FrozePrize.h"
 #include "Bullet.h"
+#include "BulletExplosion.h"
 #include "ExternalWall.h"
 #include "FreeSpace.h"
 #include "InternalWall.h"
 #include "IronInternalWall.h"
 #include "GameStatistic.h"
+#include "MainDeclarativeView.h"
+#include "AudioDelegate.h"
+#include "BigExplosion.h"
 //===============================================================================================================
 #include <QPainter>
 #include <QDebug>
 #include <QPoint>
 #include <QKeyEvent>
-#include <MainDeclarativeView.h>
-#include <QSound>
+//#include <QSound>
 //===============================================================================================================
 int Labyrinth::m_siCellsInColumnQuantity;
 int Labyrinth::m_siCellsInRowQuantity;
@@ -42,13 +45,18 @@ void Labyrinth::SetInternalStaticVariables(GameStatistic * pGameStatistic,
     Bullet::SetDimensionsOfBullet(5,5);
 }
 //===============================================================================================================
-Labyrinth::Labyrinth(const int iSizeOfSideOfCell, QWidget *pParent) : QWidget(pParent)
+Labyrinth::Labyrinth(const int iSizeOfSideOfCell,
+                     AudioDelegate *pAudioDelegate,
+                     QWidget *pParent) : QWidget(pParent)
 {
-    setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::StrongFocus);
+    m_pAudioDelegate = pAudioDelegate;
+    GameThings::SetAudioDelegate(m_pAudioDelegate);
+    m_pAudioDelegate->PlayOurStop();
     m_bGameOver = false;
     m_pGameStatistic = GameThings::GetPointerGameStatistic();
     m_iSizeOfSideOfCell = iSizeOfSideOfCell;
-    const int QUANTITY_LIVE_HITS = 3;
+    const int QUANTITY_LIVE_HITS = 2;
     OurPanzer::SetLiveCount(QUANTITY_LIVE_HITS);
     CreateCells();
     SetNeighbours();
@@ -63,15 +71,16 @@ Labyrinth::Labyrinth(const int iSizeOfSideOfCell, QWidget *pParent) : QWidget(pP
     m_iGameTick = 40;
 
     m_iTimerId = startTimer(m_iGameTick);
-    m_pSound_Move = new QSound(":/audio/our_move.wav", this);
-    m_pSound_Stop = new QSound(":/audio/our_stop.wav", this);
-    m_pSound_Move->setLoops(QSound::Infinite);
-    m_pSound_Stop->setLoops(QSound::Infinite);
-    m_pSound_Stop->play();
+//    m_pSound_Move = new QSound(":/audio/our_move.wav", this);
+//    m_pSound_Stop = new QSound(":/audio/our_stop.wav", this);
+//    m_pSound_Move->setLoops(QSound::Infinite);
+//    m_pSound_Stop->setLoops(QSound::Infinite);
+//    m_pSound_Stop->play();
 }
 //===============================================================================================================
 Labyrinth::~Labyrinth()
 {
+    m_pAudioDelegate->StopGameAudio();
     Clean();
 }
 //===============================================================================================================
@@ -103,6 +112,18 @@ void Labyrinth::Clean()
         delete pBullet;
     }
     m_qlist_Bullets.clear();
+    for (int bullet_explosion_count = 0; bullet_explosion_count < m_qlist_BulletExplosions.size(); ++bullet_explosion_count) {
+        BulletExplosion * pBulletExplosion = m_qlist_BulletExplosions[bullet_explosion_count];
+        m_qlist_BulletExplosions[bullet_explosion_count] = nullptr;
+        delete pBulletExplosion;
+    }
+    m_qlist_BulletExplosions.clear();
+    for (int big_explosion_count = 0; big_explosion_count < m_qlist_BigExplosions.size(); ++big_explosion_count) {
+        BigExplosion * pBigExplosion = m_qlist_BigExplosions[big_explosion_count];
+        m_qlist_BigExplosions[big_explosion_count] = nullptr;
+        delete pBigExplosion;
+    }
+    m_qlist_BigExplosions.clear();
     if (nullptr != m_pOurPanzer) {
         delete m_pOurPanzer;
         m_pOurPanzer = nullptr;
@@ -116,8 +137,8 @@ void Labyrinth::Clean()
     if (nullptr != m_pOurFlag) {
         delete m_pOurFlag;
     }
-    delete m_pSound_Move;
-    delete m_pSound_Stop;
+    //delete m_pSound_Move;
+    //delete m_pSound_Stop;
 }
 //===============================================================================================================
 void Labyrinth::Draw()
@@ -142,6 +163,13 @@ void Labyrinth::Draw()
     foreach (Bullet * pBullet, m_qlist_Bullets) {
         pBullet->Draw();
     }
+    foreach (BulletExplosion * pBulletExplosion, m_qlist_BulletExplosions) {
+        pBulletExplosion->Draw();
+    }
+    foreach(BigExplosion * pBigExplosion, m_qlist_BigExplosions) {
+        pBigExplosion->Draw();
+    }
+
     if (m_pOurPanzer) {
         m_pOurPanzer->Draw();
     }
@@ -161,8 +189,9 @@ void Labyrinth::slotKeyPress(const int &iKey)
         }
         if (iKey == Qt::Key_Up || iKey == Qt::Key_Down || iKey == Qt::Key_Left || iKey == Qt::Key_Right) {
             m_pOurPanzer->SetVelosity(DEFAULT_OUR_VELOSITY);
-            m_pSound_Stop->stop();
-            m_pSound_Move->play();
+            m_pAudioDelegate->PlayOurMove();
+//            m_pSound_Stop->stop();
+//            m_pSound_Move->play();
         }
         if (iKey == Qt::Key_Up) {
             m_pOurPanzer->SetOrientation(DynamicGameThings::Up);
@@ -185,8 +214,9 @@ void Labyrinth::slotKeyRelease(const int &iKey)
         if (iKey == Qt::Key_Up || iKey == Qt::Key_Down || iKey == Qt::Key_Left || iKey == Qt::Key_Right)
         {
             m_pOurPanzer->SetVelosity(0);
-            m_pSound_Stop->play();
-            m_pSound_Move->stop();
+            m_pAudioDelegate->PlayOurStop();
+//            m_pSound_Stop->play();
+//            m_pSound_Move->stop();
         }
         else if (iKey == Qt::Key_Space) {
                 m_pOurPanzer->UnsetShootingSign();
@@ -302,6 +332,7 @@ void Labyrinth::DoGameOver()
     else {
         m_pGameStatistic->SetGameResult(false);
     }
+    //m_pAudioDelegate->StopGameAudio();
 }
 //===============================================================================================================
 int Labyrinth::DecrementDeadTime(const int &iTick)
@@ -325,19 +356,18 @@ void Labyrinth::KillAllAliens()
     bool bAtLeastOne = false;
     while (it_first!=it_end) {
         (*it_first)->MarkToDelete();
+        m_qlist_BigExplosions.push_back((*it_first)->CreateBigExplosion());
         bAtLeastOne = true;
         ++it_first;
     }
     if (bAtLeastOne) {
-        QSound::play(":/audio/explosion.wav");
+        //QSound::play(":/audio/explosion.wav");
+        m_pAudioDelegate->PlayExplosion();
     }
 }
 //===============================================================================================================
 void Labyrinth::FrozeAliens()
 {
-    foreach (AlienPanzer * pAlienPanzer, m_qlist_Aliens) {
-        pAlienPanzer->SetFrozen(true);
-    }
     m_bFrozeAliens = true;
     m_iTimeFroze = m_iGameTick * 150;
 }
@@ -633,6 +663,20 @@ void Labyrinth::PrizesStepInGame(const int &iTime)
     }
 }
 //===============================================================================================================
+void Labyrinth::BulletsExplosionStepInGame()
+{
+    foreach (BulletExplosion * pBulletExplosion, m_qlist_BulletExplosions) {
+        pBulletExplosion->DecrementTick();
+    }
+}
+//===============================================================================================================
+void Labyrinth::BigExplosionStepInGame()
+{
+    foreach (BigExplosion * pBigExplosion, m_qlist_BigExplosions) {
+        pBigExplosion->DecrementTick();
+    }
+}
+//===============================================================================================================
 void Labyrinth::BulletsStepInGame()
 {
     foreach (Bullet * pBullet, m_qlist_Bullets) {
@@ -642,15 +686,30 @@ void Labyrinth::BulletsStepInGame()
         if (bCellChange) {
             int c = pBullet->GetColumn();
             int r = pBullet->GetRow();
-            m_qvec_LabyrinthCell[c][r]->GetStaticCellObject()->BulletHitHandler(pBullet);
-            if (nullptr != m_qvec_LabyrinthCell[c][r]->GetDynamicGameThings()) {
-                m_qvec_LabyrinthCell[c][r]->GetDynamicGameThings()->BulletHitHandler(pBullet);
+            GameThings * pStaticGameThing = m_qvec_LabyrinthCell[c][r]->GetStaticCellObject();
+            pStaticGameThing->BulletHitHandler(pBullet);
+            if (pStaticGameThing->IsExplosion()) {
+                m_qlist_BigExplosions.push_back(pStaticGameThing->CreateBigExplosion());
+            }
+            DynamicGameThings * pDynamicGameThings = m_qvec_LabyrinthCell[c][r]->GetDynamicGameThings();
+            if (nullptr != pDynamicGameThings) {
+                pDynamicGameThings->BulletHitHandler(pBullet);
+                if(pDynamicGameThings->IsExplosion()) {
+                    m_qlist_BigExplosions.push_back(pDynamicGameThings->CreateBigExplosion());
+                }
             }
             if (nullptr != m_pOurFlag) {
                 if (m_pOurFlag->GetColumn() == c && m_pOurFlag->GetRow() == r) {
                     m_pOurFlag->BulletHitHandler(pBullet);
+                    if (m_pOurFlag->IsExplosion()) {
+                        m_qlist_BigExplosions.push_back(m_pOurFlag->CreateBigExplosion());
+                    }
                 }
             }
+        }
+        if (pBullet->IsMarkedToDelete()) {
+            BulletExplosion * pBulletExplosion = pBullet->GetExplosion();
+            m_qlist_BulletExplosions.push_back(pBulletExplosion);
         }
     }
 }
@@ -731,6 +790,40 @@ void Labyrinth::CleanBulletsStepInGame()
     }
 }
 //===============================================================================================================
+void Labyrinth::CleanBulletsExplosionStepInGame()
+{
+    auto it_first_bullet_explosion = m_qlist_BulletExplosions.begin();
+    auto it_end_bullet_explosion = m_qlist_BulletExplosions.end();
+    while (it_first_bullet_explosion != it_end_bullet_explosion) {
+        if ((*it_first_bullet_explosion)->GetTick() < 0) {
+            BulletExplosion * pBulletExplosion = (*it_first_bullet_explosion);
+            delete pBulletExplosion;
+            m_qlist_BulletExplosions.erase(it_first_bullet_explosion);
+            it_first_bullet_explosion = m_qlist_BulletExplosions.begin();
+            it_end_bullet_explosion = m_qlist_BulletExplosions.end();
+            continue;
+        }
+        it_first_bullet_explosion++;
+    }
+}
+//===============================================================================================================
+void Labyrinth::CleanBigExplosionStepInGame()
+{
+    auto it_first_big_explosion = m_qlist_BigExplosions.begin();
+    auto it_end_big_explosion = m_qlist_BigExplosions.end();
+    while (it_first_big_explosion != it_end_big_explosion) {
+        if ((*it_first_big_explosion)->GetTick() < 0) {
+            BigExplosion * pBigExplosion = (*it_first_big_explosion);
+            delete pBigExplosion;
+            m_qlist_BigExplosions.erase(it_first_big_explosion);
+            it_first_big_explosion = m_qlist_BigExplosions.begin();
+            it_end_big_explosion = m_qlist_BigExplosions.end();
+            continue;
+        }
+        it_first_big_explosion++;
+    }
+}
+//===============================================================================================================
 void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
 {
     static int iTime = 0;
@@ -753,10 +846,14 @@ void Labyrinth::timerEvent(QTimerEvent * pTimerEvent)
 
     AliensStepInGame(iTime);
     PrizesStepInGame(iTime);
+    BulletsExplosionStepInGame();
+    BigExplosionStepInGame();
     BulletsStepInGame();
 
     CleanPrizesStepInGame();
     CleanBulletsStepInGame();
+    CleanBulletsExplosionStepInGame();
+    CleanBigExplosionStepInGame();
     CleanAliensStepInGame();
     CleanOursStepInGame();
     Draw();

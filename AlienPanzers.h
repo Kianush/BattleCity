@@ -28,8 +28,6 @@ public:
     void SetTypicalVelosity();
     int GetWidth() const;
     int GetHeight() const;
-    void SetFrozen(const bool &bFrozen);
-    bool IsFrozen() const;
     static void SetCodeOwnerOfBullets(const int &iCodeOwner);
     static void SetQuantitySimpleAliens(const int &iQuantitySimpleAliens);
     static void DecrementQuantityAliens();
@@ -50,7 +48,6 @@ private:
     int m_iShowBorningTime;
     bool m_bIsDead;
     bool m_bIsBorning;
-    bool m_bIsFrozen;
     int m_iCost;
 
     static int m_siWidthOfMainImage;

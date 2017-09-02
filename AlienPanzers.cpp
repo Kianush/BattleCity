@@ -2,10 +2,10 @@
 #include "AlienPanzers.h"
 #include "Bullet.h"
 #include "GameStatistic.h"
+#include "AudioDelegate.h"
 //================================================================================================================
 #include <QDeclarativeView>
 #include <QGraphicsObject>
-#include <QSound>
 //================================================================================================================
 int AlienPanzer::m_siCodeOwnerOfBullet;
 int AlienPanzer::m_siQuantitySimpleAliensInGame;
@@ -53,7 +53,6 @@ AlienPanzer::AlienPanzer(const int &iColumn, const int &iRow) : DynamicGameThing
     m_iShowBorningTime = 2000;
     m_bIsDead = false;
     m_bIsBorning = false;
-    m_bIsFrozen = false;
     m_iCost = 100;
     QString qmlObjectName = "alien_"+QString::number(m_siNumberOfTheAlien);
     m_siNumberOfTheAlien++;
@@ -215,7 +214,8 @@ void AlienPanzer::BulletHitHandler(Bullet * pBullet)
         if (GetLiveHits() < 0) {
             SetStatistic();
             m_bIsDead = true;
-            QSound::play(":/audio/explosion.wav");
+            SetExplosion();
+            m_psAudioDelegate->PlayExplosion();
         }
     }
 }
@@ -306,15 +306,5 @@ int AlienPanzer::GetHeight() const
     else {
         return m_siWidthOfMainImage;
     }
-}
-//================================================================================================================
-void AlienPanzer::SetFrozen(const bool &bFrozen)
-{
-    m_bIsFrozen = bFrozen;
-}
-//================================================================================================================
-bool AlienPanzer::IsFrozen() const
-{
-    return m_bIsFrozen;
 }
 //================================================================================================================

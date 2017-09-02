@@ -1,9 +1,9 @@
 #include "PrizesThings.h"
 #include "OurPanzer.h"
+#include "AudioDelegate.h"
 //===============================================================================================================
 #include <QtGlobal>
 #include <QRectF>
-#include <QSound>
 //===============================================================================================================
 Prize::Prize(const int &iColumn, const int &iRow) : GameThings(iColumn, iRow)
 {
@@ -69,7 +69,8 @@ bool Prize::OurPanzerHanler(OurPanzer * pOurPanzer)
     if (thePrizeRect.intersects(pOurPanzer->GetBoundingRect())) {
         bToReturn = true;
         m_bIsEffect = true;
-        QSound::play(":/audio/get_prize.wav");
+        //QSound::play(":/audio/get_prize.wav");
+        m_psAudioDelegate->PlayGetPrize();
     }
     return bToReturn;
 }

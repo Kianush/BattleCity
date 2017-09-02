@@ -138,6 +138,23 @@ bool DynamicGameThings::IsGeometrycalHitting(Bullet * pBullet) const
 
     switch (pBullet->GetMoveOrientation()) {
         case Left:
+            pBullet->SetCentrExplosion(x_end, GetRow()*GetCellSide() + GetCellSide()/2);
+            break;
+        case Right:
+            pBullet->SetCentrExplosion(x_begin, GetRow()*GetCellSide() + GetCellSide()/2);
+            break;
+        case Up:
+            pBullet->SetCentrExplosion(GetColumn()*GetCellSide() + GetCellSide()/2, y_end);
+            break;
+        case Down:
+            pBullet->SetCentrExplosion(GetColumn()*GetCellSide() + GetCellSide()/2, y_begin);
+            break;
+        default:
+            break;
+    }
+
+    switch (pBullet->GetMoveOrientation()) {
+        case Left:
         case Right:
             if ((y_bullet_begin >= y_begin && y_bullet_begin <= y_end) ||
                 (y_bullet_end >= y_begin && y_bullet_end <= y_end)) {

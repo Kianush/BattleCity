@@ -1,4 +1,5 @@
 #include "Bullet.h"
+#include "BulletExplosion.h"
 //==================================================================================================================
 #include <QDeclarativeView>
 #include <QGraphicsObject>
@@ -149,5 +150,25 @@ int Bullet::GetWidth() const
 int Bullet::GetHeight() const
 {
     return m_siBulletHeight;
+}
+//==================================================================================================================
+BulletExplosion * Bullet::GetExplosion() const
+{
+    BulletExplosion * pBulletExplosion = new BulletExplosion(0,0,0,0);
+    int iColumn = (m_iExplosionX - pBulletExplosion->GetWidth()/2) / GetCellSide();
+    int iXdiplace = (m_iExplosionX - pBulletExplosion->GetWidth()/2) % GetCellSide();
+    int iRow = (m_iExplosionY - pBulletExplosion->GetHeight()/2)/GetCellSide();
+    int iYdiplace = (m_iExplosionY - pBulletExplosion->GetHeight()/2) % GetCellSide();
+    pBulletExplosion->SetColumn(iColumn);
+    pBulletExplosion->SetXdiplace(iXdiplace);
+    pBulletExplosion->SetRow(iRow);
+    pBulletExplosion->SetYdiplace(iYdiplace);
+    return pBulletExplosion;
+}
+//==================================================================================================================
+void Bullet::SetCentrExplosion(const int &iExplosionX, const int &iExplosionY)
+{
+   m_iExplosionX = iExplosionX;
+   m_iExplosionY = iExplosionY;
 }
 //==================================================================================================================

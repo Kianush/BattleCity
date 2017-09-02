@@ -4,6 +4,7 @@
 #include "DynamicGameThings.h"
 //=================================================================================================================
 class QObject;
+class BulletExplosion;
 //=================================================================================================================
 class Bullet : public DynamicGameThings
 {
@@ -25,17 +26,22 @@ public:
     DynamicGameThings::Orientation GetMoveOrientation() const;
     virtual int GetWidth() const;
     virtual int GetHeight() const;
+    BulletExplosion * GetExplosion() const;
     static void SetDimensionsOfBullet(const int &iWidth, const int &iHeight);
+    void SetCentrExplosion(const int &iExplosionX, const int &iExplosionY);
 protected:
     virtual int GetX() const;
     virtual int GetY() const;
 private:
     bool m_bMarkToDelete;
     int m_iCodeOwnersOfTheBullet;
+    int m_iExplosionX;
+    int m_iExplosionY;
     DynamicGameThings * m_pParent;
     static int m_siNumberOfBullet;
     static int m_siBulletWidth;
     static int m_siBulletHeight;
+
 //    QObject * m_pQmlImage;
 };
 //=================================================================================================================

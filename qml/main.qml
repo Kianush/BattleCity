@@ -40,9 +40,9 @@ Rectangle {
         }
     }
 
-    Image {
-    x: 0
-    y: 0
+//    Image {
+//    x: 0
+//    y: 0
         Component.onCompleted: {
                     var component = Qt.createComponent("GameCell.qml");
                     var compName;
@@ -91,7 +91,7 @@ Rectangle {
                     else {
                         sprite.x = -40;//column*40;
                         sprite.y = -40;//row*40;
-                        sprite.z = 2;
+                        //sprite.z = 2;
                         sprite.active = false;
                         sprite.objectName = compName;
                     }
@@ -123,6 +123,38 @@ Rectangle {
                             sprite.objectName = compName;
                         }
                     }
+                    for(var bullet_explosion_count = 0; bullet_explosion_count < 256; bullet_explosion_count++) {
+                        compName = "bullet_explosion_" + bullet_explosion_count;
+                        sprite = component.createObject(canvas);
+                        if (sprite == null) {
+                            // Error Handling
+                            console.log("Error creating object");
+                        }
+                        else {
+                            sprite.x = -40;//column*40;
+                            sprite.y = -40;//row*40;
+                            sprite.width = 15;
+                            sprite.height = 15;
+                            sprite.active = false;
+                            sprite.objectName = compName;
+                        }
+                    }
+                    for(var big_explosion_count = 0; big_explosion_count < 32; big_explosion_count++) {
+                        compName = "big_explosion_" + big_explosion_count;
+                        sprite = component.createObject(canvas);
+                        if (sprite == null) {
+                            // Error Handling
+                            console.log("Error creating object");
+                        }
+                        else {
+                            sprite.x = -50;//column*40;
+                            sprite.y = -50;//row*40;
+                            sprite.width = 50;
+                            sprite.height = 50;
+                            sprite.active = false;
+                            sprite.objectName = compName;
+                        }
+                    }
                     for (var alien_count = 0; alien_count < 20; alien_count++) {
 
                         compName = "alien_" + alien_count;
@@ -144,5 +176,17 @@ Rectangle {
                     sprite.objectName = compName;
 
                 }
-    }
+
+   // }
+//    Rectangle{
+//        color : "#FF000000"
+//        z:2
+//    Image {
+//        id: name
+//        x: 580
+//        y: 20
+//        //z: 2
+//        source: "Images/alien_panzer_nord.png"
+//    }
+//    }
 }

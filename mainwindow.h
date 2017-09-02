@@ -13,6 +13,8 @@ class MainWindow;
 class Labyrinth;
 class GameStatistic;
 class MainDeclarativeView;
+class AudioDelegate;
+class GameAudioThread;
 //================================================================================================================
 class MainWindow : public QMainWindow
 {
@@ -27,12 +29,14 @@ private slots:
     void slotNewGame();
 private:
     QObject * m_pRoot;
-    Ui::MainWindow *ui;
+    //Ui::MainWindow *ui;
     QDeclarativeView * m_pqdvUi;
     Labyrinth * m_pLabyrinth;
     GameStatistic * m_pGameStatistic;
     bool m_bGameStarted;
     void SetGame();
+    AudioDelegate * m_pAudioDelegate;
+    GameAudioThread * m_pGameAudioThread;
 };
 //================================================================================================================
 #endif // MAINWINDOW_H

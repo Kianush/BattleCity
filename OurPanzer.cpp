@@ -1,11 +1,11 @@
 #include "OurPanzer.h"
 #include "Bullet.h"
+#include "AudioDelegate.h"
 //=================================================================================================================
 #include <QDebug>
 #include <math.h>
 #include <QDeclarativeView>
 #include <QGraphicsObject>
-#include <QSound>
 //=================================================================================================================
 int OurPanzer::m_siLiveCount;
 //=================================================================================================================
@@ -50,7 +50,7 @@ void OurPanzer::SetOrientation(const DynamicGameThings::Orientation &eOrientatio
                 break;
             }
         }
-        QSound::play(":/audio/rotate.wav");
+        m_psAudioDelegate->PlayRotate();
     }
 }
 //=================================================================================================================
@@ -99,7 +99,8 @@ Bullet * OurPanzer::Shoot()
     pToReturn->SetCodeOwner(GetMyCodeOfBullet());
     pToReturn->SetParent(this);
     m_bIsShooting = true;
-    QSound::play(":/audio/shot.wav");
+    //QSound::play(":/audio/shot.wav");
+    m_psAudioDelegate->PlayShot();
     return pToReturn;
 }
 //=================================================================================================================
@@ -114,7 +115,8 @@ void OurPanzer::BulletHitHandler(Bullet * pBullet)
         DecrementLiveHits();
         pBullet->MarkToDelete();
         if (GetLiveHits() < 0) {
-            QSound::play(":/audio/explosion.wav");
+            SetExplosion();
+            m_psAudioDelegate->PlayExplosion();
             MarkToDelete();
         }
     }

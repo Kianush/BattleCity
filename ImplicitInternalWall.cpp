@@ -99,6 +99,7 @@ QString ImplicitInternalWall::GetStringImage() const
 //===============================================================================================================
 void ImplicitInternalWall::BulletHitHandler(Bullet * pBullet)
 {
+    GameThings::BulletHitHandler(pBullet);
     pBullet->MarkToDelete();
     DecrementLiveHits();
 }

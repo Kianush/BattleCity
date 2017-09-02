@@ -2,8 +2,7 @@
 #include "FreeSpace.h"
 #include "ImplicitInternalWall.h"
 #include "Bullet.h"
-//===============================================================================================================
-#include <QSound>
+#include "AudioDelegate.h"
 //===============================================================================================================
 InternalWall::InternalWall(const int &iColumn, const int &iRow) : GameThings(iColumn, iRow)
 {
@@ -30,8 +29,10 @@ QString InternalWall::GetStringImage() const
 void InternalWall::BulletHitHandler(Bullet * pBullet)
 {
     m_pImplicitStaticGameThings->BulletHitHandler(pBullet);
+    SetExplosion(m_pImplicitStaticGameThings->IsExplosion());
     if (m_pImplicitStaticGameThings->GetLiveHits() < 0) {
-        QSound::play(":/audio/explosion.wav");
+        SetExplosion();
+        m_psAudioDelegate->PlayExplosion();
         delete m_pImplicitStaticGameThings;
         m_pImplicitStaticGameThings = new FreeSpace(m_iColumn, m_iRow);
     }

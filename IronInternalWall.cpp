@@ -21,6 +21,7 @@ QString IronInternalWall::GetStringImage() const
 //===============================================================================================================
 void IronInternalWall::BulletHitHandler(Bullet * pBullet)
 {
+    GameThings::BulletHitHandler(pBullet);
     pBullet->MarkToDelete();
 }
 //===============================================================================================================

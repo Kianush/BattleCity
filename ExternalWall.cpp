@@ -21,6 +21,7 @@ ExternalWall::~ExternalWall()
 //===============================================================================================================
 void ExternalWall::BulletHitHandler(Bullet * pBullet)
 {
+    GameThings::BulletHitHandler(pBullet);
     pBullet->MarkToDelete();
 }
 //===============================================================================================================
