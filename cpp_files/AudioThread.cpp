@@ -13,19 +13,19 @@ GameAudioPlayer::GameAudioPlayer(QObject * pParent) : QObject(pParent)
     //m_pStopSound->setLoops(QSound::Infinite);
     const int SIZE_PULL_SOUNDS = 5;
     for (int sound_count = 0; sound_count < SIZE_PULL_SOUNDS; ++sound_count) {
-        QSound * pSound = new QSound(":/audio/shot.wav", this);
+        QSound * pSound = new QSound(":/audio/shot.wav");
         m_qvecShotSound.push_back(pSound);
 
-        pSound = new QSound(":/audio/rotate.wav", this);
+        pSound = new QSound(":/audio/rotate.wav");
         m_qvecRotateSound.push_back(pSound);
 
-        pSound = new QSound(":/audio/our_move.wav", this);
+        pSound = new QSound(":/audio/our_move.wav");
         m_qvecMoveSound.push_back(pSound);
 
-        pSound = new QSound(":/audio/explosion.wav", this);
+        pSound = new QSound(":/audio/explosion.wav");
         m_qvecExplosionSound.push_back(pSound);
 
-        pSound = new QSound(":/audio/our_stop.wav", this);
+        pSound = new QSound(":/audio/our_stop.wav");
         m_qvecStopSound.push_back(pSound);
     }
 //    m_qvecStopSound[0]->setLoops(QSound::Infinite);
