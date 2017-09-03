@@ -177,6 +177,33 @@ void AlienPanzer::Move(bool &bCellChange)
 void AlienPanzer::DummyRotate()
 {
     int iRandResult = rand() % 2;
+//    int iRandResult = rand() % 4;
+//    if (m_eOrientation == Down || m_eOrientation == Up) {
+//        if (iRandResult) {
+//            if (iRandResult % 2) {
+//                SetOrientation(Left);
+//            }
+//            else {
+//                SetOrientation(Right);
+//            }
+//        }
+//        else {
+//            SetOrientation(Orientation(((int)m_eOrientation + 1) % 4));
+//        }
+//    }
+//    else {
+//        if (iRandResult) {
+//            if (iRandResult % 2) {
+//                SetOrientation(Up);
+//            }
+//            else {
+//                SetOrientation(Down);
+//            }
+//        }
+//        else {
+//            SetOrientation(Orientation(((int)m_eOrientation + 3) % 4));
+//        }
+//    }
     if (!iRandResult) {
         SetOrientation(Orientation(((int)m_eOrientation + 1) % 4));
     }
@@ -308,3 +335,32 @@ int AlienPanzer::GetHeight() const
     }
 }
 //================================================================================================================
+bool AlienPanzer::CanMoveIntoCurrentCell() const
+{
+    bool bToReturn = false;
+    switch (m_eOrientation) {
+        case Left:
+            if (m_iXdiplace >= 0 && (m_iXdiplace - m_iVelosity) >= 0) {
+                bToReturn = true;
+            }
+            break;
+        case Right:
+            if (m_iXdiplace <= 0 && (m_iXdiplace + m_iVelosity) <= 0) {
+                bToReturn = true;
+            }
+            break;
+        case Up:
+            if (m_iYdiplace >= 0 && (m_iYdiplace - m_iVelosity) >= 0) {
+                bToReturn = true;
+            }
+            break;
+        case Down:
+            if (m_iYdiplace <= 0 && (m_iYdiplace + m_iVelosity) <= 0) {
+                bToReturn = true;
+            }
+            break;
+        default:
+            break;
+    }
+    return bToReturn;
+}

@@ -5,7 +5,7 @@
 #include <QtGlobal>
 #include <QRectF>
 //===============================================================================================================
-Prize::Prize(const int &iColumn, const int &iRow) : GameThings(iColumn, iRow)
+Prize::Prize(const int &iColumn, const int &iRow) : DynamicGameThings(iColumn, iRow, 0)
 {
     m_bIsMarkedToDelete = false;
     m_iShowPrizeCostTime = 20;
@@ -83,5 +83,20 @@ QString Prize::GetStringImage() const
 bool Prize::IsEffect() const
 {
     return m_bIsEffect;
+}
+//===============================================================================================================
+void Prize::Move(bool &bCellChange)
+{
+    bCellChange = false;
+}
+//===============================================================================================================
+int Prize::GetWidth() const
+{
+    return GetCellSide();
+}
+//===============================================================================================================
+int Prize::GetHeight() const
+{
+    return GetCellSide();
 }
 //===============================================================================================================

@@ -184,33 +184,33 @@ QRectF OurPanzer::GetBoundingRect()
     return theRect;
 }
 //=================================================================================================================
-bool OurPanzer::CanMoveIntoCurrentCell() const
-{
-    bool bToReturn = false;
-    switch (m_eOrientation) {
-        case Left:
-            if (m_iXdiplace >= 0 && (m_iXdiplace - m_iVelosity) >= 0) {
-                bToReturn = true;
-            }
-            break;
-        case Right:
-            if (m_iXdiplace <= 0 && (m_iXdiplace + m_iVelosity) <= 0) {
-                bToReturn = true;
-            }
-            break;
-        case Up:
-            if (m_iYdiplace >= 0 && (m_iYdiplace - m_iVelosity) >= 0) {
-                bToReturn = true;
-            }
-            break;
-        case Down:
-            if (m_iYdiplace <= 0 && (m_iYdiplace + m_iVelosity) <= 0) {
-                bToReturn = true;
-            }
-            break;
-        default:
-            break;
-    }
-    return bToReturn;
-}
+//bool OurPanzer::CanMoveIntoCurrentCell() const
+//{
+//    bool bToReturn = false;
+//    switch (m_eOrientation) {
+//        case Left:
+//            if (m_iXdiplace >= 0 && (m_iXdiplace - m_iVelosity) >= 0) {
+//                bToReturn = true;
+//            }
+//            break;
+//        case Right:
+//            if (m_iXdiplace <= 0 && (m_iXdiplace + m_iVelosity) <= 0) {
+//                bToReturn = true;
+//            }
+//            break;
+//        case Up:
+//            if (m_iYdiplace >= 0 && (m_iYdiplace - m_iVelosity) >= 0) {
+//                bToReturn = true;
+//            }
+//            break;
+//        case Down:
+//            if (m_iYdiplace <= 0 && (m_iYdiplace + m_iVelosity) <= 0) {
+//                bToReturn = true;
+//            }
+//            break;
+//        default:
+//            break;
+//    }
+//    return bToReturn;
+//}
 //=================================================================================================================

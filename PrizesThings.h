@@ -1,11 +1,11 @@
 #ifndef PRIZESTHINGS_H
 #define PRIZESTHINGS_H
 //===============================================================================================================
-#include "GameThings.h"
+#include "DynamicGameThings.h"
 //===============================================================================================================
 class OurPanzer;
 //===============================================================================================================
-class Prize : public GameThings
+class Prize : public DynamicGameThings
 {
 public:
     Prize(const int &iColumn, const int &iRow);
@@ -20,6 +20,9 @@ public:
     virtual void BulletHitHandler(Bullet * pBullet);
     virtual bool OurPanzerHanler(OurPanzer * pOurPanzer);
     virtual QString GetStringImage() const;
+    virtual void Move(bool &bCellChange);
+    virtual int GetWidth() const;
+    virtual int GetHeight() const;
     bool IsEffect() const;
 private:
     int m_iPrizeCost;

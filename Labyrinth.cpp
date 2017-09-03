@@ -50,6 +50,7 @@ Labyrinth::Labyrinth(const int iSizeOfSideOfCell,
                      QWidget *pParent) : QWidget(pParent)
 {
     //setFocusPolicy(Qt::StrongFocus);
+    m_iDeadTime = 3000;
     m_pAudioDelegate = pAudioDelegate;
     GameThings::SetAudioDelegate(m_pAudioDelegate);
     m_pAudioDelegate->PlayOurStop();
@@ -337,9 +338,9 @@ void Labyrinth::DoGameOver()
 //===============================================================================================================
 int Labyrinth::DecrementDeadTime(const int &iTick)
 {
-    static int iDeadTime = 3000;
-    iDeadTime -= iTick;
-    return iDeadTime;
+    //static int iDeadTime = 3000;
+    m_iDeadTime -= iTick;
+    return m_iDeadTime;
 }
 //===============================================================================================================
 void Labyrinth::ExitLevel()
@@ -539,6 +540,7 @@ void Labyrinth::BuildInternalWalls()
 void Labyrinth::CreateOurFlag()
 {
     m_pOurFlag = new FlagPrize(7,13, this);
+    m_qvec_LabyrinthCell[m_pOurFlag->GetColumn()][m_pOurFlag->GetRow()]->SetDynamicCellObject(m_pOurFlag);
 }
 //===============================================================================================================
 void Labyrinth::SetNeighbours()
@@ -618,7 +620,8 @@ void Labyrinth::AliensStepInGame(const int &iTime)
             int c = pAlienPanzer->GetColumn();
             int r = pAlienPanzer->GetRow();
             if (c < m_siCellsInColumnQuantity && r < m_siCellsInRowQuantity) {
-                if(pAlienPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r])) {
+                if(pAlienPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r]) ||
+                   pAlienPanzer->CanMoveIntoCurrentCell()) {
                     bool bCellChange = false;
                     pAlienPanzer->Move(bCellChange);
                     if (bCellChange) {
@@ -629,6 +632,28 @@ void Labyrinth::AliensStepInGame(const int &iTime)
                     }
                 }
                 else {
+//                    if (!pAlienPanzer->CanMoveIntoCurrentCell()) {
+//                        if (pAlienPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r]->GetLower())) {
+//                            pAlienPanzer->SetOrientation(DynamicGameThings::Down);
+//                            if (pAlienPanzer->CanMoveToTheNextCell(m_qvec_LabyrinthCell[c][r])) {
+//                                bool bCellChange = false;
+//                                pAlienPanzer->Move(bCellChange);
+//                                if (bCellChange) {
+//                                    m_qvec_LabyrinthCell[c][r]->SetDynamicCellObject(nullptr);
+//                                    int c = pAlienPanzer->GetColumn();
+//                                    int r = pAlienPanzer->GetRow();
+//                                    m_qvec_LabyrinthCell[c][r]->SetDynamicCellObject(pAlienPanzer);
+//                                }
+//                            }
+//                            else {
+//                                pAlienPanzer->DummyRotate();
+//                            }
+//                        }
+//                        else {
+//                            pAlienPanzer->DummyRotate();
+//                        }
+//                    }
+
                     pAlienPanzer->DummyRotate();
                 }
                 if (iTime % 1000 == 0) {
@@ -690,12 +715,14 @@ void Labyrinth::BulletsStepInGame()
             pStaticGameThing->BulletHitHandler(pBullet);
             if (pStaticGameThing->IsExplosion()) {
                 m_qlist_BigExplosions.push_back(pStaticGameThing->CreateBigExplosion());
+                pStaticGameThing->SetExplosion(false);
             }
             DynamicGameThings * pDynamicGameThings = m_qvec_LabyrinthCell[c][r]->GetDynamicGameThings();
             if (nullptr != pDynamicGameThings) {
                 pDynamicGameThings->BulletHitHandler(pBullet);
                 if(pDynamicGameThings->IsExplosion()) {
                     m_qlist_BigExplosions.push_back(pDynamicGameThings->CreateBigExplosion());
+                    pDynamicGameThings->SetExplosion(false);
                 }
             }
             if (nullptr != m_pOurFlag) {
@@ -703,6 +730,7 @@ void Labyrinth::BulletsStepInGame()
                     m_pOurFlag->BulletHitHandler(pBullet);
                     if (m_pOurFlag->IsExplosion()) {
                         m_qlist_BigExplosions.push_back(m_pOurFlag->CreateBigExplosion());
+                        m_pOurFlag->SetExplosion(false);
                     }
                 }
             }
@@ -727,6 +755,7 @@ void Labyrinth::CleanOursStepInGame()
     }
     if (nullptr != m_pOurFlag) {
         if (m_pOurFlag->IsMarkedToDelete()) {
+            m_qvec_LabyrinthCell[m_pOurFlag->GetColumn()][m_pOurFlag->GetRow()]->RemoveDynamicGameThings(m_pOurFlag);
             delete m_pOurFlag;
             m_pOurFlag = nullptr;
         }

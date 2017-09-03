@@ -16,7 +16,7 @@ public:
     virtual void Move(bool &bCellChange);
     virtual bool CanMoveDynamicalThing(DynamicGameThings * pDynamicGameThings);
     virtual void SetOrientation(const DynamicGameThings::Orientation &eOrientation);
-
+    bool CanMoveIntoCurrentCell() const;
     void DummyRotate();
     void MarkToDelete();
     bool IsMarkedToDelete() const;

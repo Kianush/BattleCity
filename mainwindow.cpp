@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pGameAudioThread->start();
     m_pqdvUi->setSource(QUrl("qrc:/qml/main.qml"));
     setCentralWidget(m_pqdvUi);
+    setMaximumHeight(m_pqdvUi->height());
     m_pqdvUi->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     m_pRoot = m_pqdvUi->rootObject();
     m_pqdvUi->rootContext()->setContextProperty("window", this);

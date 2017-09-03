@@ -87,6 +87,7 @@ private:
     bool m_bGameOver;
     bool m_bFrozeAliens;
     int m_iTimeFroze;
+    int m_iDeadTime;
     GameStatistic * m_pGameStatistic;
     AudioDelegate * m_pAudioDelegate;
 //    QSound * m_pSound_Move;

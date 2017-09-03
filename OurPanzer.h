@@ -17,7 +17,7 @@ public:
     QRectF GetBoundingRect();
     bool IsShooting() const;
     void UnsetShootingSign();
-    bool CanMoveIntoCurrentCell() const;
+    //bool CanMoveIntoCurrentCell() const;
     static int GetLiveCount();
     static void SetLiveCount(const int &iLiveCount);
 protected:
