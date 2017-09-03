@@ -31,7 +31,7 @@ GameAudioPlayer::GameAudioPlayer(QObject * pParent) : QObject(pParent)
 //    m_qvecStopSound[0]->setLoops(QSound::Infinite);
 //    m_qvecStopSound[0]->play();
     //m_pExplosionSound = new QSound(":/audio/explosion.wav", this);
-    m_pGetPrizeSound = new QSound(":/audio/get_prize.wav", this);
+    m_pGetPrizeSound = new QSound(":/audio/get_prize.wav");
     m_bIsMoving = false;
 }
 //=================================================================================================================
