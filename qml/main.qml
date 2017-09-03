@@ -56,7 +56,7 @@ Rectangle {
                                 sprite = component.createObject(canvas);
                                 if (sprite == null) {
                                     // Error Handling
-                                    console.log("Error creating object");
+                                    //console.log("Error creating object");
                                 }
                                 else {
                                     sprite.x = 0;//column*40;
@@ -72,7 +72,7 @@ Rectangle {
                         sprite = component.createObject(canvas);
                         if (sprite == null) {
                             // Error Handling
-                            console.log("Error creating object");
+                            //console.log("Error creating object");
                         }
                         else {
                             sprite.x = -40;//column*40;
@@ -86,7 +86,7 @@ Rectangle {
                     sprite = component.createObject(canvas);
                     if (sprite == null) {
                         // Error Handling
-                        console.log("Error creating object");
+                        //console.log("Error creating object");
                     }
                     else {
                         sprite.x = -40;//column*40;
@@ -99,7 +99,7 @@ Rectangle {
                     sprite = component.createObject(canvas);
                     if (sprite == null) {
                         // Error Handling
-                        console.log("Error creating object");
+                        //console.log("Error creating object");
                     }
                     else {
                         sprite.x = -40;//column*40;
@@ -112,7 +112,7 @@ Rectangle {
                         sprite = component.createObject(canvas);
                         if (sprite == null) {
                             // Error Handling
-                            console.log("Error creating object");
+                            //console.log("Error creating object");
                         }
                         else {
                             sprite.x = -40;//column*40;
@@ -128,7 +128,7 @@ Rectangle {
                         sprite = component.createObject(canvas);
                         if (sprite == null) {
                             // Error Handling
-                            console.log("Error creating object");
+                            //console.log("Error creating object");
                         }
                         else {
                             sprite.x = -40;//column*40;
@@ -144,7 +144,7 @@ Rectangle {
                         sprite = component.createObject(canvas);
                         if (sprite == null) {
                             // Error Handling
-                            console.log("Error creating object");
+                            //console.log("Error creating object");
                         }
                         else {
                             sprite.x = -50;//column*40;
@@ -161,7 +161,7 @@ Rectangle {
                         sprite = component.createObject(canvas);
                         if (sprite == null) {
                             // Error Handling
-                            console.log("Error creating object");
+                            //console.log("Error creating object");
                         }
                         else {
                             sprite.x = -40;//column*40;
