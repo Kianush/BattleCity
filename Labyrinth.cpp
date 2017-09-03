@@ -42,7 +42,7 @@ void Labyrinth::SetInternalStaticVariables(GameStatistic * pGameStatistic,
     GameThings::SetPointerMainDeclarativeView(pMainDeclarativeView);
     AlienPanzer::SetCodeOwnerOfBullets(iOwnerCodeOfBulletsOfAliens);
     AlienPanzer::SetDimensionsOfMainImage(27, 35);
-    Bullet::SetDimensionsOfBullet(5,5);
+    Bullet::SetDimensionsOfBullet(7,7);
 }
 //===============================================================================================================
 Labyrinth::Labyrinth(const int iSizeOfSideOfCell,

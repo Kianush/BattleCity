@@ -28,8 +28,8 @@ GameAudioPlayer::GameAudioPlayer(QObject * pParent) : QObject(pParent)
         pSound = new QSound(":/audio/our_stop.wav", this);
         m_qvecStopSound.push_back(pSound);
     }
-    m_qvecStopSound[0]->setLoops(QSound::Infinite);
-    m_qvecStopSound[0]->play();
+//    m_qvecStopSound[0]->setLoops(QSound::Infinite);
+//    m_qvecStopSound[0]->play();
     //m_pExplosionSound = new QSound(":/audio/explosion.wav", this);
     m_pGetPrizeSound = new QSound(":/audio/get_prize.wav", this);
     m_bIsMoving = false;
@@ -77,44 +77,44 @@ void GameAudioPlayer::customEvent(QEvent *pCustomEvent)
 {
     int iCustomEventType = pCustomEvent->type();
     if (iCustomEventType == UserMoveAudioEvent::UserMoveAudioType) {
-        if (m_bIsMoving != true) {
-            m_bIsMoving = true;
-            static int iCallMoveCount = 0;
-            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
-            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->play();
+//        if (m_bIsMoving != true) {
+//            m_bIsMoving = true;
+//            static int iCallMoveCount = 0;
+//            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
+//            m_qvecMoveSound[iCallMoveCount%m_qvecMoveSound.size()]->play();
 
-            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
-                if ((iCallMoveCount%m_qvecMoveSound.size()) != sound_count) {
-                    m_qvecMoveSound[sound_count]->setLoops(0);
-                }
-                m_qvecStopSound[sound_count]->stop();
-            }
-            iCallMoveCount++;
-        }
+//            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+//                if ((iCallMoveCount%m_qvecMoveSound.size()) != sound_count) {
+//                    m_qvecMoveSound[sound_count]->setLoops(0);
+//                }
+//                m_qvecStopSound[sound_count]->stop();
+//            }
+//            iCallMoveCount++;
+//        }
     }
     if (iCustomEventType == UserStopAudioEvent::UserStopAudioType) {
-        if (m_bIsMoving != false) {
-            m_bIsMoving = false;
-            static int iCallStopCount = 0;
-            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
-            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->play();
+//        if (m_bIsMoving != false) {
+//            m_bIsMoving = false;
+//            static int iCallStopCount = 0;
+//            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->setLoops(QSound::Infinite);
+//            m_qvecStopSound[iCallStopCount%m_qvecMoveSound.size()]->play();
 
-            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
-                if ((iCallStopCount%m_qvecStopSound.size()) != sound_count) {
-                    m_qvecStopSound[sound_count]->setLoops(0);
-                }
-                m_qvecMoveSound[sound_count]->stop();
-            }
-            iCallStopCount++;
-        }
+//            for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+//                if ((iCallStopCount%m_qvecStopSound.size()) != sound_count) {
+//                    m_qvecStopSound[sound_count]->setLoops(0);
+//                }
+//                m_qvecMoveSound[sound_count]->stop();
+//            }
+//            iCallStopCount++;
+//        }
     }
     if (iCustomEventType == GameStopAudioEvent::GameStopAudioType) {
-        for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
-            m_qvecMoveSound[sound_count]->stop();
-        }
-        for (int sound_count = 0; sound_count < m_qvecStopSound.size(); ++sound_count) {
-            m_qvecStopSound[sound_count]->stop();
-        }
+//        for (int sound_count = 0; sound_count < m_qvecMoveSound.size(); ++sound_count) {
+//            m_qvecMoveSound[sound_count]->stop();
+//        }
+//        for (int sound_count = 0; sound_count < m_qvecStopSound.size(); ++sound_count) {
+//            m_qvecStopSound[sound_count]->stop();
+//        }
     }
     if (iCustomEventType == GetPrizeAudioEvent::GetPrizeAudioType) {
         //QSound::play(":/audio/get_prize.wav");

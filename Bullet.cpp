@@ -119,7 +119,7 @@ int Bullet::GetX() const
 //==================================================================================================================
 int Bullet::GetY() const
 {
-    return m_iRow*GetCellSide() + m_iYdiplace + + GetCellSide()/2 - GetHeight()/2;
+    return m_iRow*GetCellSide() + m_iYdiplace + GetCellSide()/2 - GetHeight()/2;
 }
 //==================================================================================================================
 bool Bullet::IsMarkedToDelete() const

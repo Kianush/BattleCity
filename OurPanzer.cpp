@@ -95,6 +95,7 @@ Bullet * OurPanzer::Shoot()
 {
     int iColumnBullet, iRowBullet, iXdiplaceBullet, iYdiplaceBullet;
     RecalculatePosition(iColumnBullet, iRowBullet, iXdiplaceBullet, iYdiplaceBullet);
+
     Bullet * pToReturn = new Bullet(iColumnBullet, iRowBullet, iXdiplaceBullet, iYdiplaceBullet, 20, m_eOrientation);
     pToReturn->SetCodeOwner(GetMyCodeOfBullet());
     pToReturn->SetParent(this);
