@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "Labyrinth.h"
 #include "GameStatistic.h"
 #include "MainDeclarativeView.h"
@@ -19,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pGameAudioThread->start();
     m_pqdvUi->setSource(QUrl("qrc:/qml/main.qml"));
     setCentralWidget(m_pqdvUi);
-    setMaximumHeight(m_pqdvUi->height());
+    setMinimumHeight(m_pqdvUi->height());
     m_pqdvUi->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     m_pRoot = m_pqdvUi->rootObject();
     m_pqdvUi->rootContext()->setContextProperty("window", this);
